@@ -1,0 +1,59 @@
+.formContainer {
+	width: 80%;
+	max-width: 750px;
+}
+
+label {
+	font-size: 1.5rem;
+	font-weight: bold;
+	padding-left: 0.2rem;
+	margin-bottom: 0.2rem;
+}
+
+input {
+	border-radius: 0.2rem;
+	font-size: 1rem;
+	width: 100%;
+	outline: none;
+	border: none;
+	padding: 0.6rem;
+}
+
+.emailContainer,
+.pincodeContainer {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	flex-direction: column;
+}
+
+.pincodeContainer {
+	margin-top: 2rem;
+}
+
+.submitButton {
+	margin-top: 4rem;
+	font-size: 1.5rem;
+	padding: 0.5rem 1.2rem;
+	font-weight: bold;
+	border-radius: 0.2rem;
+	border: none;
+	outline: none;
+
+	transition: all 0.1s ease-in-out;
+}
+
+.linkComponent:hover,
+.submitButton:hover {
+	cursor: pointer;
+	text-decoration: underline;
+	border-color: rgb(102, 102, 102);
+	border-radius: 0.8rem;
+}
+
+.linkComponent {
+	display: flex;
+	justify-content: center;
+	width: 50%;
+	margin: auto;
+}
