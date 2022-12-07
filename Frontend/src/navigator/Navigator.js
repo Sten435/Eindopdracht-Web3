@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import StudentLogin from '../screens/student/login/Login';
 import StudentDashboard from '../screens/student/dashboard/Dashboard';
+import StudentOpdracht from '../screens/student/opdracht_element/Opdracht';
 
 import NotFoundScreen from '../screens/error/404';
 
@@ -25,6 +26,10 @@ const Navigator = () => {
 				<Route
 					path='dashboard'
 					element={<StudentDashboard />}
+				/>
+				<Route
+					path='opdracht/:id'
+					element={<StudentOpdracht />}
 				/>
 			</Route>
 			<Route

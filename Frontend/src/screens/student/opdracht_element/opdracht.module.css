@@ -1,0 +1,8 @@
+.main {
+	display: block;
+}
+
+.flexContainer {
+	display: flex;
+	align-items: center;
+}

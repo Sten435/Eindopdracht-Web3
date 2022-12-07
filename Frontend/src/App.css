@@ -10,7 +10,6 @@ body {
 
 main {
 	display: flex;
-	justify-content: center;
 	align-items: center;
 	flex-direction: column;
 
@@ -20,6 +19,17 @@ main {
 	width: 100%;
 
 	background-color: rgb(215, 215, 215);
+}
+
+hr {
+	color: white;
+}
+
+a {
+	text-decoration: none;
+	color: black;
+	display: inline-block;
+	padding: 1rem;
 }
 
 h1,
@@ -32,4 +42,81 @@ b,
 a {
 	padding: 0;
 	margin: 0;
+}
+
+/* Global */
+
+button {
+	margin: 1rem 0;
+	background-color: whitesmoke;
+	color: rgb(5, 163, 5);
+	border: 1px solid rgb(5, 163, 5);
+	font-weight: bold;
+	font-size: 1rem;
+	cursor: pointer;
+	outline: 0;
+	border-radius: 5px;
+	padding: 8px;
+}
+
+button:hover {
+	text-decoration: underline;
+}
+
+.buttonActive {
+	background-color: rgb(5, 163, 5);
+	color: whitesmoke;
+}
+
+.inputText {
+	width: 100%;
+
+	font-size: 1.4rem;
+	font-weight: bold;
+	padding: 0.2rem 0.4rem;
+
+	border-radius: 5px;
+	border: solid 2px rgba(0, 85, 0, 0.424);
+	color: rgb(1, 66, 1);
+}
+
+input[type='radio'] {
+	margin: 0 1rem;
+	accent-color: rgb(5, 163, 5);
+}
+
+.section {
+	width: 80%;
+	margin: auto;
+}
+
+.gaTerug {
+	background-color: rgba(221, 7, 7, 0.771);
+	color: white;
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.gaTerug:hover {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.terugContainer {
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	padding-top: 1rem;
+}
+
+/* Header */
+.header {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	flex-direction: row;
+
+	width: 100%;
+
+	background-color: rgba(192, 192, 192, 0.822);
 }

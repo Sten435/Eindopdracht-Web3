@@ -1,38 +1,37 @@
-import './login.css';
-
-import { Link } from 'react-router-dom';
+import { Button, InputText } from '../../../components';
+import style from './login.module.css';
 
 const Login = () => {
 	return (
-		<main>
+		<main className={style.main}>
 			<h1>Student Login</h1>
-			<div className='formContainer'>
-				<div className='emailContainer'>
-					<label htmlFor='email'>Email:</label>
-					<input
-						id='email'
-						placeholder='Enter your email'
-						type='text'
-					/>
+			<div className={style.formContainer}>
+				<div className={style.emailContainer}>
+					<label
+						className={style.label}
+						htmlFor='email'>
+						Email:
+					</label>
+					<InputText placeholder='Enter your email' />
 				</div>
-				<div className='pincodeContainer'>
-					<label htmlFor='pincode'>Pincode:</label>
-					<input
-						id='pincode'
-						maxLength={10}
+				<div className={style.pincodeContainer}>
+					<label
+						className={style.label}
+						htmlFor='pincode'>
+						Pincode:
+					</label>
+					<InputText
 						placeholder='Enter your pincode'
-						type='text'
+						maxLength={10}
 					/>
 				</div>
-				<Link
-					to='/student/dashboard'
-					className='linkComponent'>
-					<input
-						type='submit'
-						className='submitButton'
-						value='Login'
+				<div className={style.loginContainer}>
+					<Button
+						text='Login'
+						style={{ padding: '.4rem 1.4rem', fontSize: '1.6rem', marginTop: '1.4rem' }}
+						to='/student/dashboard'
 					/>
-				</Link>
+				</div>
 			</div>
 		</main>
 	);
