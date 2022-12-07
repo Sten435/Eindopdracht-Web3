@@ -8,11 +8,14 @@ const Card = ({ opdracht: { titel, beschrijving, status }, to }) => {
 			to={to}
 			style={{ textDecoration: 'none', width: '100%' }}>
 			<div className={style.card}>
-				<b>
+				<div>
 					<h2>{titel}</h2>
-					<p>{beschrijving}</p>
-				</b>
-				<span className={style.statusContainer + ' ' + style[status]}>{status.toLocaleUpperCase()}</span>
+					<p style={{ marginBottom: '20px' }}>{beschrijving}</p>
+					<span>
+						Resterend: <b className={style.resterendeTijd}>1u 16m 12s</b>
+					</span>
+				</div>
+				{status && <span className={style.statusContainer + ' ' + style[status]}>{status}</span>}
 			</div>
 		</Link>
 	);

@@ -13,7 +13,10 @@ const Dashboard = () => {
 	const vakNaam = '<Web 3>';
 	return (
 		<main className={style.main}>
-			<Header />
+			<Header
+				title='Student Dashboard'
+				name='student stan'
+			/>
 			<h1 style={{ marginTop: 20, marginBottom: 20 }}>{vakNaam}</h1>
 			{opdrachten.map((opdracht, index) => {
 				return (

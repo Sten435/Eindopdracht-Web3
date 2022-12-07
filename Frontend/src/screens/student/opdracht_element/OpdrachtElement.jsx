@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { BulletLijst, Button, GaTerug, Header, InputText, Section } from '../../../components/index.js';
-import style from './opdracht.module.css';
+import style from './opdrachtElement.module.css';
 
-const Opdracht = () => {
+const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
 
 	const opdracht = {};
@@ -11,13 +11,21 @@ const Opdracht = () => {
 	const { id, titel, beschrijving, status } = opdracht;
 	return (
 		<main className={style.main}>
-			<Header />
+			<Header
+				title='Student Dashboard'
+				name='student stan'
+			/>
 			<Section noLine>
 				<GaTerug
 					text='Ga Terug'
 					to='/student/dashboard'
 				/>
-				<h1 style={{ marginBottom: '1.2rem' }}>{titel ?? '<Titel>'}</h1>
+				<div className={style.helpContainer}>
+					<h1 style={{ display: 'inline-block', marginBottom: '1.2rem' }}>
+						{titel ?? '<Titel> - '} <b>1u 16m 12s</b>
+					</h1>
+					<Button text='Vraag Hulp 🤘' />
+				</div>
 			</Section>
 			<Section title='Status'>
 				<div className={style.flexContainer}>
@@ -88,11 +96,11 @@ const Opdracht = () => {
 			</Section>
 			<Section title='Vragen'>
 				<BulletLijst items={vragen} />
-				<InputText />
+				<InputText maxLength={255} />
 				<Button text='Verstuur vraag' />
 			</Section>
 		</main>
 	);
 };
 
-export default Opdracht;
+export default OpdrachtElement;

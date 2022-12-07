@@ -1,11 +1,10 @@
 import React from 'react';
 
-const Header = () => {
-	const studentNaam = '<Stan Persoons>';
+const Header = ({ title, name }) => {
 	return (
 		<header className='header'>
-			<h1>Student Dashboard</h1>
-			<b>{studentNaam}</b>
+			<h1>{title}</h1>
+			<b>{name}</b>
 		</header>
 	);
 };

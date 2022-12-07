@@ -2,7 +2,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import StudentLogin from '../screens/student/login/Login';
 import StudentDashboard from '../screens/student/dashboard/Dashboard';
-import StudentOpdracht from '../screens/student/opdracht_element/Opdracht';
+import StudentOpdracht from '../screens/student/opdracht_element/OpdrachtElement';
+
+import HostDashboard from '../screens/host/dashboard/Dashboard';
+import HostOpdracht from '../screens/host/opdracht_element/OpdrachtElement';
 
 import NotFoundScreen from '../screens/error/404';
 
@@ -18,20 +21,26 @@ const Navigator = () => {
 					/>
 				}
 			/>
-			<Route path='student'>
-				<Route
-					path='login'
-					element={<StudentLogin />}
-				/>
-				<Route
-					path='dashboard'
-					element={<StudentDashboard />}
-				/>
-				<Route
-					path='opdracht/:id'
-					element={<StudentOpdracht />}
-				/>
-			</Route>
+			<Route
+				path='student/login'
+				element={<StudentLogin />}
+			/>
+			<Route
+				path='student/dashboard'
+				element={<StudentDashboard />}
+			/>
+			<Route
+				path='student/opdracht/:id'
+				element={<StudentOpdracht />}
+			/>
+			<Route
+				path='host/dashboard'
+				element={<HostDashboard />}
+			/>
+			<Route
+				path='host/opdracht/:id'
+				element={<HostOpdracht />}
+			/>
 			<Route
 				path='*'
 				element={<NotFoundScreen />}

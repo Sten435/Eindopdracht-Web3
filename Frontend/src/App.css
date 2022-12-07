@@ -15,7 +15,7 @@ main {
 
 	padding-bottom: 8rem;
 
-	height: 100vh;
+	min-height: 100vh;
 	width: 100%;
 
 	background-color: rgb(215, 215, 215);
@@ -104,9 +104,8 @@ input[type='radio'] {
 
 .terugContainer {
 	display: flex;
-	justify-content: end;
 	align-items: center;
-	padding-top: 1rem;
+	margin-top: 2rem;
 }
 
 /* Header */

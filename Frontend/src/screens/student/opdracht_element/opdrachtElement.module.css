@@ -1,0 +1,14 @@
+.main {
+	display: block;
+}
+
+.flexContainer {
+	display: flex;
+	align-items: center;
+}
+
+.helpContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
