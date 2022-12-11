@@ -2,9 +2,19 @@ import React from 'react';
 import Header from '../../../components/header/Header';
 import Card from '../../../components/card/Card';
 import style from './dashboard.module.css';
+import CardGrid from '../../../components/cardGrid/CardGrid';
 
 const Dashboard = () => {
 	const opdrachten = [
+		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
+		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
+		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
+		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
+		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
+		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
+		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
+		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
+		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
 		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
 		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
 		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
@@ -13,20 +23,13 @@ const Dashboard = () => {
 	const vakNaam = '<Web 3>';
 	return (
 		<main className={style.main}>
-			<Header
-				title='Student Dashboard'
-				name='student stan'
-			/>
+			<Header title="Student Dashboard" name="student stan" />
 			<h1 style={{ marginTop: 20, marginBottom: 20 }}>{vakNaam}</h1>
-			{opdrachten.map((opdracht, index) => {
-				return (
-					<Card
-						to={`/student/opdracht/${opdracht.id}`}
-						opdracht={opdracht}
-						key={index}
-					/>
-				);
-			})}
+			<CardGrid>
+				{opdrachten.map((opdracht, index) => {
+					return <Card to={`/student/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
+				})}
+			</CardGrid>
 		</main>
 	);
 };

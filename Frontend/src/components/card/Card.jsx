@@ -4,9 +4,7 @@ import style from './card.module.css';
 
 const Card = ({ opdracht: { titel, beschrijving, status }, to }) => {
 	return (
-		<Link
-			to={to}
-			style={{ textDecoration: 'none', width: '100%' }}>
+		<Link to={to} style={{ textDecoration: 'none', width: '100%' }}>
 			<div className={style.card}>
 				<div>
 					<h2>{titel}</h2>
