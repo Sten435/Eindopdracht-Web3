@@ -25,7 +25,7 @@ const Dashboard = () => {
 	];
 	return (
 		<main className={style.main}>
-			<Header title="Student Dashboard" name="student stan" />
+			<Header title="Student Dashboard" name="student stan" metTerugButton={false} />
 			<CardGrid>
 				{opdrachten.map((opdracht, index) => {
 					return <Card to={`/student/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;

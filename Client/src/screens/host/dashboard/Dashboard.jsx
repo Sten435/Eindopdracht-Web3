@@ -13,7 +13,7 @@ const Dashboard = () => {
 	];
 	return (
 		<main className={style.main}>
-			<Header title="Host Dashboard" name="host stan" />
+			<Header title="Host Dashboard" name="host stan" metTerugButton={false} />
 			{opdrachten.map((opdracht, index) => {
 				return <Card to={`/host/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
 			})}

@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 
 import StudentLogin from '../screens/student/login/Login';
+import Logout from '../screens/logout/Logout';
 import StudentDashboard from '../screens/student/dashboard/Dashboard';
 import StudentOpdracht from '../screens/student/opdracht_element/OpdrachtElement';
 
@@ -14,6 +15,7 @@ const Navigator = () => {
 	return (
 		<Routes>
 			<Route path="/" element={<StudentLogin />} />
+			<Route path="/logout" element={<Logout />} />
 			<Route path="student/dashboard" element={<StudentDashboard />} />
 			<Route path="student/opdracht/:id" element={<StudentOpdracht />} />
 			<Route path="host/dashboard" element={<HostDashboard />} />

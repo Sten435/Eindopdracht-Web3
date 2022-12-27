@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Fetch from './fetch';
 import axios from 'axios';
 
@@ -9,6 +9,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 	const [loading, setLoading] = useState(false);
 
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -17,12 +18,16 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 					try {
 						axios.defaults.withCredentials = true;
 						const data = await Fetch('/authenticate', 'GET');
+						console.log(data);
 						if (!data.loggedIn) {
-							return navigate('/', { replace: true });
+							if (location.pathname === '/') return;
+							return navigate('/logout', { replace: true });
+						} else {
+							if (location.pathname === '/') return navigate('/student/dashboard');
 						}
 					} catch (error) {
 						console.log(`authenticate: ${error}`);
-						return navigate('/', { replace: true });
+						return navigate('/logout', { replace: true });
 					}
 				}
 
@@ -41,7 +46,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 			}
 		};
 		fetchData();
-	}, [url, navigate, withAuth, method]);
+	}, [url, navigate, withAuth, method, location.pathname]);
 
 	return { response, error, loading };
 };

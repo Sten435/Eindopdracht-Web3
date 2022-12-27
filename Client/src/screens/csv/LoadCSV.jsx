@@ -4,6 +4,7 @@ import Loading from '../loading/Loading';
 import LoadPage from '../../controller/loadPage';
 import Fetch from '../../controller/fetch';
 import Papa from 'papaparse';
+import GaTerug from '../../components/gaTerug/GaTerug';
 
 const LoadCSV = ({ type }) => {
 	const { loading, error } = LoadPage();

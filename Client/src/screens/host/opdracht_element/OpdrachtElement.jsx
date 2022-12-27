@@ -25,16 +25,7 @@ const OpdrachtElement = () => {
 
 	return (
 		<main className={style.main}>
-			<Header
-				title='Host Dashboard'
-				name='host stan'
-			/>
-			<Section noLine>
-				<GaTerug
-					text='Ga Terug'
-					to='/host/dashboard'
-				/>
-			</Section>
+			<Header title="Host Dashboard" name="host stan" />
 			<Section noLine>
 				<div style={{ textAlign: 'center', marginBottom: '1.2rem', marginTop: '.8rem' }}>
 					<h1 className={style.title}>{title}</h1>
@@ -42,15 +33,7 @@ const OpdrachtElement = () => {
 					<h2>1u 16m 12s</h2>
 				</div>
 				{rapporten.map((rapport, index) => {
-					return (
-						<Rapport
-							key={index}
-							studentNaam={rapport.studentNaam}
-							status={rapport.status}
-							extraTijd={rapport.extraTijd}
-							vragen={rapport.vragen}
-						/>
-					);
+					return <Rapport key={index} studentNaam={rapport.studentNaam} status={rapport.status} extraTijd={rapport.extraTijd} vragen={rapport.vragen} />;
 				})}
 			</Section>
 		</main>

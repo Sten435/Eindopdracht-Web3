@@ -92,16 +92,8 @@ input[type='radio'] {
 	margin: auto;
 }
 
-.gaTerug {
-	background-color: rgba(221, 7, 7, 0.771);
-	color: white;
-	padding: 10px;
-	border-radius: 10px;
-}
-
-.gaTerug:hover {
+a:hover {
 	cursor: pointer;
-	text-decoration: underline;
 }
 
 .terugContainer {

@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button, InputText } from '../../../components';
 import style from './login.module.css';
 import axios from 'axios';
+import LoadPage from '../../../controller/loadPage';
 
 const Login = () => {
 	const usernameRef = useRef();
 	const codeRef = useRef();
 	const navigate = useNavigate();
+
+	LoadPage();
 
 	const loginRequest = async () => {
 		const username = usernameRef.current.value;

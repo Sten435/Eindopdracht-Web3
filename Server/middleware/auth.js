@@ -1,5 +1,5 @@
 import { verifyToken } from '../controllers/token_controller.js';
-const nonAuthRoutes = ['/logout', '/login'];
+const nonAuthRoutes = ['/login', '/logout'];
 
 export default async (req, res, next) => {
 	const token = req.cookies.token;
