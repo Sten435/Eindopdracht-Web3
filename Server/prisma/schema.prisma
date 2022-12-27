@@ -12,7 +12,7 @@ model groep {
   Naam         String         @db.VarChar(255)
   Aanmaakdatum DateTime       @default(now()) @db.DateTime(0)
   Geldig       Int            @default(1)
-  groepstudent groepstudent[]
+  Groepstudent groepstudent[]
 }
 
 model groepstudent {
@@ -20,8 +20,8 @@ model groepstudent {
   StudentID    Int
   Aanmaakdatum DateTime @default(now()) @db.DateTime(0)
   Geldig       Int      @default(1)
-  groep        groep    @relation(fields: [GroepID], references: [ID], onUpdate: Restrict, map: "groepstudent_ibfk_1")
-  student      student  @relation(fields: [StudentID], references: [ID], onUpdate: Restrict, map: "groepstudent_ibfk_2")
+  Groep        groep    @relation(fields: [GroepID], references: [ID], onUpdate: Restrict, map: "groepstudent_ibfk_1")
+  Student      student  @relation(fields: [StudentID], references: [ID], onUpdate: Restrict, map: "groepstudent_ibfk_2")
 
   @@id([StudentID, GroepID])
   @@index([GroepID], map: "GroepID")
@@ -29,10 +29,10 @@ model groepstudent {
 
 model opdracht {
   ID              Int               @id @default(autoincrement())
-  Naam            String            @unique(map: "Naam_UNIQUE") @db.VarChar(512)
+  Titel            String            @unique(map: "Naam_UNIQUE") @db.VarChar(512)
   Geldig          Int               @default(1)
   Aanmaakdatum    DateTime          @default(now()) @db.DateTime(0)
-  opdrachtelement opdrachtelement[]
+  Opdrachtelement opdrachtelement[]
 }
 
 model opdrachtelement {
@@ -42,8 +42,8 @@ model opdrachtelement {
   Minuten      Int       @default(1)
   Geldig       Int       @default(1)
   Aanmaakdatum DateTime  @default(now()) @db.DateTime(0)
-  opdracht     opdracht  @relation(fields: [OpdrachtID], references: [ID], onUpdate: Restrict, map: "opdrachtelement_ibfk_1")
-  rapport      rapport[]
+  Opdracht     opdracht  @relation(fields: [OpdrachtID], references: [ID], onUpdate: Restrict, map: "opdrachtelement_ibfk_1")
+  Rapport      rapport[]
 
   @@id([ID, Aanmaakdatum])
   @@index([OpdrachtID], map: "OpdrachtID")
@@ -57,9 +57,9 @@ model rapport {
   ExtraMinuten      Int             @default(0)
   Aanmaakdatum      DateTime?       @default(now()) @db.DateTime(0)
   Geldig            Int             @default(1)
-  student           student         @relation(fields: [StudentID], references: [ID], onUpdate: Restrict, map: "rapport_ibfk_1")
-  opdrachtelement   opdrachtelement @relation(fields: [OpdrachtElementID], references: [ID], onUpdate: Restrict, map: "rapport_ibfk_2")
-  vraagstudent      vraagstudent[]
+  Student           student         @relation(fields: [StudentID], references: [ID], onUpdate: Restrict, map: "rapport_ibfk_1")
+  Opdrachtelement   opdrachtelement @relation(fields: [OpdrachtElementID], references: [ID], onUpdate: Restrict, map: "rapport_ibfk_2")
+  Vraagstudent      vraagstudent[]
 
   @@index([OpdrachtElementID], map: "OpdrachtElementID")
   @@index([StudentID], map: "StudentID")
@@ -73,8 +73,8 @@ model student {
   Email          String         @db.VarChar(90)
   Aanmaakdatum   DateTime?      @default(now()) @db.DateTime(0)
   Geldig         Int            @default(1)
-  groepstudent   groepstudent[]
-  rapport        rapport[]
+  Groepstudent   groepstudent[]
+  Rapport        rapport[]
 }
 
 model vraagstudent {
@@ -83,7 +83,7 @@ model vraagstudent {
   Beschrijving String    @db.VarChar(255)
   Aanmaakdatum DateTime? @default(now()) @db.DateTime(0)
   Geldig       Int?      @default(1)
-  rapport      rapport   @relation(fields: [RapportID], references: [ID], onUpdate: Restrict, map: "vraagstudent_ibfk_1")
+  Rapport      rapport   @relation(fields: [RapportID], references: [ID], onUpdate: Restrict, map: "vraagstudent_ibfk_1")
 
   @@index([RapportID], map: "RapportID")
 }

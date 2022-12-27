@@ -2,6 +2,7 @@ import React from 'react';
 import Header from '../../../components/header/Header';
 import Card from '../../../components/card/Card';
 import style from './dashboard.module.css';
+import Button from '../../../components/button/Button';
 
 const Dashboard = () => {
 	const opdrachten = [
@@ -10,23 +11,15 @@ const Dashboard = () => {
 		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven' },
 		{ id: '4', titel: 'Deel 4', beschrijving: 'Geef alle studenten' },
 	];
-	const vakNaam = '<Web 3>';
 	return (
 		<main className={style.main}>
-			<Header
-				title='Host Dashboard'
-				name='host stan'
-			/>
-			<h1 className={style.title}>{vakNaam}</h1>
+			<Header title="Host Dashboard" name="host stan" />
 			{opdrachten.map((opdracht, index) => {
-				return (
-					<Card
-						to={`/host/opdracht/${opdracht.id}`}
-						opdracht={opdracht}
-						key={index}
-					/>
-				);
+				return <Card to={`/host/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
 			})}
+			<hr style={{ width: '100%' }} />
+			<Button to="/import/opdracht">Import Opdrachten CSV</Button>
+			<Button to="/import/student">Import Studenten CSV</Button>
 		</main>
 	);
 };

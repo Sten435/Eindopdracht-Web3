@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import StudentLogin from '../screens/student/login/Login';
 import StudentDashboard from '../screens/student/dashboard/Dashboard';
@@ -8,16 +8,18 @@ import HostDashboard from '../screens/host/dashboard/Dashboard';
 import HostOpdracht from '../screens/host/opdracht_element/OpdrachtElement';
 
 import NotFoundScreen from '../screens/error/404';
+import LoadCSV from '../screens/csv/LoadCSV';
 
 const Navigator = () => {
 	return (
 		<Routes>
-			<Route path="/" element={<Navigate to="/student/login" replace={true} />} />
-			<Route path="student/login" element={<StudentLogin />} />
+			<Route path="/" element={<StudentLogin />} />
 			<Route path="student/dashboard" element={<StudentDashboard />} />
 			<Route path="student/opdracht/:id" element={<StudentOpdracht />} />
 			<Route path="host/dashboard" element={<HostDashboard />} />
 			<Route path="host/opdracht/:id" element={<HostOpdracht />} />
+			<Route path="/import/opdracht" element={<LoadCSV type="opdracht" />} />
+			<Route path="/import/student" element={<LoadCSV type="student" />} />
 			<Route path="*" element={<NotFoundScreen />} />
 		</Routes>
 	);
