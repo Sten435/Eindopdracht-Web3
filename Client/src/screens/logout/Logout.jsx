@@ -8,12 +8,13 @@ const Logout = () => {
 
 	useEffect(() => {
 		const logout = async () => {
+			localStorage.clear();
 			const data = await Fetch('/logout', 'GET');
 			if (!data.loggedIn) navigation('/');
 			else alert('Error logging out');
 		};
 		logout();
-	}, []);
+	}, [navigation]);
 
 	return <div>Logout</div>;
 };

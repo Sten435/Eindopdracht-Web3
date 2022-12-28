@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { BulletLijst, Button, GaTerug, Header, InputText, Section } from '../../../components/index.js';
+import { Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
 import style from './opdrachtElement.module.css';
 

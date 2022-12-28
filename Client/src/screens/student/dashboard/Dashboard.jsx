@@ -8,31 +8,24 @@ import LoadPage from '../../../controller/loadPage';
 const Dashboard = () => {
 	const { response, loading, error } = LoadPage('/opdrachten', 'GET');
 
-	const opdrachten = [
-		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
-		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
-		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
-		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
-		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
-		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
-		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
-		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
-		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
-		{ id: '1', titel: 'Deel 1', beschrijving: 'Insert alle data in de file', status: 'klaar' },
-		{ id: '2', titel: 'Deel 2', beschrijving: 'Insert alle studenten data in website', status: 'bezig' },
-		{ id: '3', titel: 'Deel 3', beschrijving: 'Verwijder alle opgaven', status: 'bezig' },
-		{ id: '4', titel: 'Deel 4', beschrijving: 'Geef alle studenten', status: 'gestopt' },
-	];
-	return (
-		<main className={style.main}>
-			<Header title="Student Dashboard" name="student stan" metTerugButton={false} />
-			<CardGrid>
-				{opdrachten.map((opdracht, index) => {
-					return <Card to={`/student/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
-				})}
-			</CardGrid>
-		</main>
-	);
+	if (error) {
+		return <p>Er is iets fout gegaan</p>;
+	} else if (loading) {
+		return <p>Loading...</p>;
+	} else {
+		const opdrachten = response['Testdemonstratie SeattleFlights'];
+
+		return (
+			<main className={style.main}>
+				<Header title="Student Dashboard" name="student stan" metTerugButton={false} />
+				<CardGrid>
+					{opdrachten.map((opdracht, index) => {
+						return <Card to={`/student/opdracht/${opdracht?.id}`} opdracht={opdracht} key={index} />;
+					})}
+				</CardGrid>
+			</main>
+		);
+	}
 };
 
 export default Dashboard;

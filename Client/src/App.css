@@ -58,7 +58,7 @@ button {
 	cursor: pointer;
 	outline: 0;
 	border-radius: 5px;
-	padding: 8px;
+	padding: 4px 1rem;
 }
 
 button:hover {
@@ -111,5 +111,8 @@ a:hover {
 
 	width: 100%;
 
-	background-color: rgba(192, 192, 192, 0.822);
+	background-color: rgba(192, 192, 192, 1);
+	-webkit-box-shadow: 0 2px 4px #8d929734;
+	-moz-box-shadow: 0 2px 4px #8d929734;
+	box-shadow: 0 2px 4px #8d929734;
 }

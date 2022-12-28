@@ -1,7 +1,8 @@
-import { createOpdrachtInDb, createStudentInDb } from '../database/repositorys/csv_repo.js';
+import { insertOpdrachtInDb, insertStudentenInDb } from '../database/repositorys/csv_repo.js';
+import { encryptCode } from './user_controller.js';
 
-export const insertOpdracht = (opdracht) => {
-	opdracht = opdracht
+export const insertOpdracht = async (opdrachten) => {
+	opdrachten = opdrachten
 		.map((opdracht, index) => {
 			if (index === 0) return;
 			return {
@@ -9,29 +10,32 @@ export const insertOpdracht = (opdracht) => {
 				// naam: opdracht[1],
 				beschrijving: opdracht[2],
 				minuten: opdracht[3],
+				status: 'Niet gestart',
 			};
 		})
 		.filter((o) => o !== undefined) // verwijder header van csv
 		.filter((o) => o.naam && o.beschrijving && o.minuten); // verwijder opdrachten die lege rijen bevatten
 
-	opdracht.forEach(createOpdrachtInDb);
+	await insertOpdrachtInDb(opdrachten);
 };
 
-export const insertStudent = (student) => {
-	student = student
+export const insertStudent = async (studenten) => {
+	studenten = studenten
 		.map((student, index) => {
 			if (index === 0) return;
+
 			return {
-				password: student[0],
-				gebruikersnaam: student[1],
-				familienaam: student[2],
-				voornaam: student[3],
-				sorteernaam: student[4],
+				password: encryptCode(student[0]),
+				gebruikersNaam: student[1],
+				familieNaam: student[2],
+				voorNaam: student[3],
+				sorteerNaam: student[4],
 				email: student[5],
+				cursusGroep: student[9]?.split(' ')[1] ?? '',
 			};
 		})
 		.filter((s) => s !== undefined) // verwijder header van csv
-		.filter((s) => s.password && s.gebruikersnaam && s.familienaam && s.voornaam && s.sorteernaam && s.email); // verwijder studenten die lege rijen bevatten
+		.filter((s) => s.password && s.gebruikersNaam && s.familieNaam && s.voorNaam && s.sorteerNaam && s.email); // verwijder studenten die lege rijen bevatten
 
-	student.forEach(createStudentInDb);
+	await insertStudentenInDb(studenten);
 };

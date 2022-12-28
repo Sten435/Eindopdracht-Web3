@@ -1,9 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 
-import StudentLogin from '../screens/student/login/Login';
+import StudentLogin from '../screens/login/Login';
 import Logout from '../screens/logout/Logout';
 import StudentDashboard from '../screens/student/dashboard/Dashboard';
-import StudentOpdracht from '../screens/student/opdracht_element/OpdrachtElement';
+import OpdrachtElement from '../screens/student/opdracht_element/OpdrachtElement';
 
 import HostDashboard from '../screens/host/dashboard/Dashboard';
 import HostOpdracht from '../screens/host/opdracht_element/OpdrachtElement';
@@ -17,7 +17,7 @@ const Navigator = () => {
 			<Route path="/" element={<StudentLogin />} />
 			<Route path="/logout" element={<Logout />} />
 			<Route path="student/dashboard" element={<StudentDashboard />} />
-			<Route path="student/opdracht/:id" element={<StudentOpdracht />} />
+			<Route path="student/opdracht/:id" element={<OpdrachtElement />} />
 			<Route path="host/dashboard" element={<HostDashboard />} />
 			<Route path="host/opdracht/:id" element={<HostOpdracht />} />
 			<Route path="/import/opdracht" element={<LoadCSV type="opdracht" />} />

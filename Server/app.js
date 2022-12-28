@@ -13,8 +13,9 @@ import loginRoute from './routes/login.js';
 import logoutRoute from './routes/logout.js';
 import studentRoute from './routes/student.js';
 import opdrachtenRoute from './routes/opdrachten.js';
+import rapportenRoute from './routes/rapporten.js';
 import importFileRoute from './routes/csv.js';
-import authenticateRoute from './routes/authenticate.js';
+import authRoute from './routes/auth.js';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -36,8 +37,9 @@ app.use('/', homeRoute);
 app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
 app.use('/import', importFileRoute);
-app.use('/authenticate', authenticateRoute);
+app.use('/auth', authRoute);
 app.use('/opdrachten', opdrachtenRoute);
+app.use('/rapporten', rapportenRoute);
 app.use('/students', studentRoute);
 
 console.clear();

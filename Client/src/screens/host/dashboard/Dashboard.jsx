@@ -3,6 +3,7 @@ import Header from '../../../components/header/Header';
 import Card from '../../../components/card/Card';
 import style from './dashboard.module.css';
 import Button from '../../../components/button/Button';
+import Section from '../../../components/section/Section';
 
 const Dashboard = () => {
 	const opdrachten = [
@@ -14,9 +15,11 @@ const Dashboard = () => {
 	return (
 		<main className={style.main}>
 			<Header title="Host Dashboard" name="host stan" metTerugButton={false} />
-			{opdrachten.map((opdracht, index) => {
-				return <Card to={`/host/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
-			})}
+			<Section>
+				{opdrachten.map((opdracht, index) => {
+					return <Card to={`/host/opdracht/${opdracht.id}`} opdracht={opdracht} key={index} />;
+				})}
+			</Section>
 			<hr style={{ width: '100%' }} />
 			<Button to="/import/opdracht">Import Opdrachten CSV</Button>
 			<Button to="/import/student">Import Studenten CSV</Button>

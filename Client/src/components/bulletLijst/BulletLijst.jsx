@@ -2,7 +2,11 @@ const BulletLijst = ({ items }) => {
 	return (
 		<ul>
 			{items.map((vraag, index) => {
-				return <li key={index}>{vraag}</li>;
+				return (
+					<li key={index} className="list-disc list-inside list-item">
+						{vraag}
+					</li>
+				);
 			})}
 		</ul>
 	);

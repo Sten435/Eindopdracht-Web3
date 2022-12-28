@@ -7,7 +7,10 @@ export default async (req, res, next) => {
 	if (nonAuthRoutes.includes(req.url)) return next();
 	try {
 		if (!token) return res.json({ error: true, message: 'token is required', loggedIn: false });
-		if (!verifyToken(token)) return res.json({ error: true, message: 'token not valid', loggedIn: false });
+		const verifyResult = verifyToken(token);
+		if (!verifyResult) return res.json({ error: true, message: 'token not valid', loggedIn: false });
+
+		req.user = verifyResult.user;
 
 		return next();
 	} catch (error) {
