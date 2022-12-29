@@ -16,9 +16,9 @@ router.get('/:id', async (req, res) => {
 	const opdracht = await getOpdrachtById(id);
 	if (!opdracht.found) return res.json({ message: 'opdracht niet gevonden', error: true, loggedIn: true });
 
-	const { naam, beschrijving, minuten } = opdracht.opdracht;
+	const { naam, beschrijving, seconden } = opdracht.opdracht;
 
-	return res.json({ message: 'success', error: false, loggedIn: true, opdracht: { naam, beschrijving, minuten } });
+	return res.json({ message: 'success', error: false, loggedIn: true, opdracht: { naam, beschrijving, seconden } });
 });
 
 router.post('/vraag', async (req, res) => {

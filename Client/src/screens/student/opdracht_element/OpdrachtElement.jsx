@@ -53,7 +53,7 @@ const OpdrachtElement = () => {
 	if (error) return <p>Er is iets fout gegaan</p>;
 	if (loading || selectedStatus === 'NAN') return <p>Loading...</p>;
 
-	const { naam, beschrijving, minuten } = response;
+	const { naam, beschrijving, seconden } = response;
 
 	const addVraag = async () => {
 		const nieuweVraag = vraagRef.current.value;
@@ -115,7 +115,7 @@ const OpdrachtElement = () => {
 				<div className={style.helpContainer}>
 					<h1 className="text-2xl underline font-bold mb-2">{naam}</h1>
 					<p className="m-4">{beschrijving}</p>
-					<b className="text-xl font-bold">{minuten} min</b>
+					<b className="text-xl font-bold">{seconden} min</b>
 					<Button text="Vraag Hulp 🤘" />
 					<hr className="w-full" />
 					<Button text="Start" className="mt-8 text-2xl hidden" referace={startStatusRef} click={startReport} />

@@ -9,13 +9,13 @@ export const insertOpdracht = async (opdrachten) => {
 				naam: opdracht[0],
 				// naam: opdracht[1],
 				beschrijving: opdracht[2],
-				minuten: opdracht[3],
+				seconden: opdracht[3] * 60,
 				status: 'Niet gestart',
 				startDatum: '',
 			};
 		})
 		.filter((o) => o !== undefined) // verwijder header van csv
-		.filter((o) => o.naam && o.beschrijving && o.minuten); // verwijder opdrachten die lege rijen bevatten
+		.filter((o) => o.naam && o.beschrijving && o.seconden); // verwijder opdrachten die lege rijen bevatten
 
 	await insertOpdrachtInDb(opdrachten);
 };

@@ -14,7 +14,7 @@ export const getOpdrachtenFromDB = async () => {
 		if (!dictionary[item.naam]) {
 			dictionary[item.naam] = [];
 		}
-		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, minuten: item.minuten });
+		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden });
 	});
 
 	return dictionary;

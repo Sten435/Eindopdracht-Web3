@@ -37,6 +37,7 @@ router.get('/:opdrachtId', async (req, res) => {
 		message: 'success',
 		error: false,
 		loggedIn: true,
+		opdracht: bestaatOpdrachtId.opdracht,
 		rapporten: result.map((rapport) => {
 			return {
 				student: rapport.student[0],
