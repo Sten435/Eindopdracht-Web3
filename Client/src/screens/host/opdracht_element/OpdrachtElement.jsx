@@ -2,26 +2,18 @@ import { useParams } from 'react-router-dom';
 import { Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
 import style from './opdrachtElement.module.css';
+import LoadPage from '../../../controller/loadPage.js';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
+	const { response, loading, error } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
-	const rapporten = [
-		{
-			studentNaam: 'Stan Persoons',
-			status: 'Klaar',
-			extraTijd: '10',
-			vragen: ['Ik heb een vraag voor de docent', 'Ik heb een vraag voor de medestudenten'],
-		},
-		{
-			studentNaam: 'Weude De Crop',
-			status: 'Bezig',
-			extraTijd: '15',
-			vragen: ['Ik heb een vraag voor de docent', 'Ik heb een vraag voor de medestudenten'],
-		},
-	];
+	if (error) return <h1>Er is iets fout gegaan</h1>;
+	if (loading) return <h1>Loading...</h1>;
 
-	const title = 'Deel ' + opdrachtId;
+	const { rapporten } = response;
+
+	const title = '';
 
 	return (
 		<main className={style.main}>
@@ -33,7 +25,7 @@ const OpdrachtElement = () => {
 					<h2>1u 16m 12s</h2>
 				</div>
 				{rapporten.map((rapport, index) => {
-					return <Rapport key={index} studentNaam={rapport.studentNaam} status={rapport.status} extraTijd={rapport.extraTijd} vragen={rapport.vragen} />;
+					return <Rapport key={index} studentNaam={rapport.student.voorNaam + ' ' + rapport.student.familieNaam} status={rapport.status} extraTijd={rapport.extraMinuten} vragen={rapport.vragen} />;
 				})}
 			</Section>
 		</main>

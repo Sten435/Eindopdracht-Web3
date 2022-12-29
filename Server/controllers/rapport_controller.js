@@ -1,7 +1,15 @@
-import { insertRapportInDB, getRapportByStudentIdAndOpdrachtIdInDB, wijzigRapportInDB } from '../database/repositorys/rapport_repo.js';
+import { insertRapportInDB, getRapportByStudentIdAndOpdrachtIdInDB, wijzigRapportInDB, getRapportFromDb, getRapportenByOpdrachtIdFromDb } from '../database/repositorys/rapport_repo.js';
 
 export const insertRapport = async (studentId, opdrachtId) => {
 	return await insertRapportInDB(studentId, opdrachtId);
+};
+
+export const getRapport = async (studentId, opdrachtId) => {
+	return await getRapportFromDb(studentId, opdrachtId);
+};
+
+export const getRapportenByOpdrachtId = async (opdrachtId) => {
+	return await getRapportenByOpdrachtIdFromDb(opdrachtId);
 };
 
 export const getRapportByStudentIdAndOpdrachtId = async (studentId, opdrachtId) => {

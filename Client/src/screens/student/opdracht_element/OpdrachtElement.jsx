@@ -7,13 +7,16 @@ import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
 	const [vragen, setVraag] = useState([]);
-	const [eenMinuutButton, setEenMinuutButton] = useState(false);
-	const [vijfMinuutButton, setVijfMinuutButton] = useState(false);
-	const [tienMinuutButton, setTienMinuutButton] = useState(false);
+	const [selectedButton, setSelectedButton] = useState();
+	const [selectedStatus, setSelectedStatus] = useState('NAN');
+
 	const { id: opdrachtId } = useParams();
+
 	const vraagRef = useRef();
 	const vragenFormRef = useRef();
+	const startStatusRef = useRef();
 	const statusFormRef = useRef();
+	const bezigStatusRef = useRef();
 
 	const result = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
 	const { response, loading, error, user } = result;
@@ -21,13 +24,34 @@ const OpdrachtElement = () => {
 	useEffect(() => {
 		if (!user) return;
 
-		Fetch(`/opdrachten/vraag/${user._id}/${opdrachtId}`, 'GET').then((vragen) => {
-			setVraag(vragen);
+		Fetch(`/rapporten/${user._id}/${opdrachtId}`, 'GET').then((result) => {
+			const { rapport } = result;
+			if (!rapport && result.message.toLowerCase() === 'rapport bestaat niet') {
+				setSelectedButton({});
+				setSelectedStatus('');
+				if (startStatusRef.current) startStatusRef.current.classList.remove('hidden');
+				return;
+			}
+
+			setSelectedStatus(rapport.status);
+
+			if (rapport.extraMinuten === 1) {
+				setSelectedButton({ een: true, vijf: false, tien: false });
+			} else if (rapport.extraMinuten === 5) {
+				setSelectedButton({ een: false, vijf: true, tien: false });
+			} else if (rapport.extraMinuten === 10) {
+				setSelectedButton({ een: false, vijf: false, tien: true });
+			}
+		});
+
+		Fetch(`/opdrachten/vraag/${user._id}/${opdrachtId}`, 'GET').then((result) => {
+			if (result.error) return alert(result.message);
+			setVraag(result.vragen);
 		});
 	}, [user, opdrachtId]);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
-	if (loading) return <p>Loading...</p>;
+	if (loading || selectedStatus === 'NAN') return <p>Loading...</p>;
 
 	const { naam, beschrijving, minuten } = response;
 
@@ -40,9 +64,10 @@ const OpdrachtElement = () => {
 			vraagRef.current.placeholder = 'Je hebt deze vraag al eens gesteld';
 			await new Promise((resolve) => setTimeout(resolve, 1250));
 		} else {
-			const result = await Fetch('/opdrachten/vraag', 'POST', { studentId: user._id, opdrachtId, vraag: nieuweVraag });
-			if (!result.error) setVraag([...vragen, nieuweVraag]);
-			else alert(result.message);
+			Fetch('/opdrachten/vraag', 'POST', { studentId: user._id, opdrachtId, vraag: nieuweVraag }).then((result) => {
+				if (result.error) return alert(result.message);
+				setVraag([...vragen, nieuweVraag]);
+			});
 		}
 
 		vragenFormRef.current.reset();
@@ -50,20 +75,37 @@ const OpdrachtElement = () => {
 	};
 
 	const startReport = async () => {
-		const result = await Fetch('/rapporten/start', 'POST', { studentId: user._id, opdrachtId });
+		Fetch('/rapporten/start', 'POST', { studentId: user._id, opdrachtId }).then((result) => {
+			if (result.error) return alert(result.message);
 
-		if (!result.error) console.log(result);
-		else alert(result.message);
+			setSelectedStatus('bezig');
+			bezigStatusRef.current.checked = true;
+			if (startStatusRef.current) startStatusRef.current.classList.add('hidden');
+		});
 	};
 
 	const wijzigStatus = async (e) => {
 		e.preventDefault();
 		const status = statusFormRef.current.status.value;
 
-		const result = await Fetch('/rapporten/status', 'PUT', { studentId: user._id, opdrachtId, status });
+		if (selectedStatus === status || !status) return;
 
-		if (!result.error) console.log(result);
-		else alert(result.message);
+		setSelectedStatus(status.toLowerCase());
+
+		Fetch('/rapporten/status', 'PUT', { studentId: user._id, opdrachtId, status }).then((result) => {
+			if (result.error) return alert(result.message);
+		});
+	};
+
+	const wijzigMinuten = async (buttons) => {
+		if (JSON.stringify(selectedButton) === JSON.stringify(buttons) || !buttons) return;
+		setSelectedButton(buttons);
+		const button = Object.keys(buttons).find((b) => buttons[b]);
+
+		const minutenObject = { een: 1, vijf: 5, tien: 10 };
+		Fetch('/rapporten/tijd', 'PUT', { studentId: user._id, opdrachtId, extraTijd: minutenObject[button] }).then((result) => {
+			if (result.error) return alert(result.message);
+		});
 	};
 
 	return (
@@ -76,56 +118,43 @@ const OpdrachtElement = () => {
 					<b className="text-xl font-bold">{minuten} min</b>
 					<Button text="Vraag Hulp 🤘" />
 					<hr className="w-full" />
-					<Button text="Start" className="mt-8 text-2xl" click={startReport} />
+					<Button text="Start" className="mt-8 text-2xl hidden" referace={startStatusRef} click={startReport} />
 				</div>
 			</Section>
 			<Section title="Status">
 				<form onSubmit={(e) => wijzigStatus(e)} ref={statusFormRef}>
 					<div className="mt-4">
-						<input name="status" value="bezig" type="radio" id="bezig" />
+						<input name="status" value="bezig" type="radio" id="bezig" ref={bezigStatusRef} defaultChecked={selectedStatus === 'bezig'} />
 						<label htmlFor="bezig">
 							<b>Bezig</b>
 						</label>
 					</div>
 					<div className={style.flexContainer}>
-						<input className={style.radio} name="status" type="radio" value="ik doe niet mee" id="ikDoeNietMee" />
+						<input className={style.radio} name="status" type="radio" value="ik doe niet mee" id="ikDoeNietMee" defaultChecked={selectedStatus === 'ik doe niet mee'} />
 						<label htmlFor="ikDoeNietMee">
 							<b>Ik doe niet mee</b>
 						</label>
 					</div>
 					<div className={style.flexContainer}>
-						<input className={style.radio} name="status" type="radio" value="ik geef op" id="ikGeefop" />
+						<input className={style.radio} name="status" type="radio" value="ik geef op" id="ikGeefop" defaultChecked={selectedStatus === 'ik geef op'} />
 						<label htmlFor="ikGeefop">
 							<b>Ik geef op</b>
 						</label>
 					</div>
 					<div className={style.flexContainer}>
-						<input className={style.radio} name="status" type="radio" value="ik ben klaar" id="ikBenKlaar" />
+						<input className={style.radio} name="status" type="radio" value="ik ben klaar" id="ikBenKlaar" defaultChecked={selectedStatus === 'ik ben klaar'} />
 						<label htmlFor="ikBenKlaar">
 							<b>Ik ben klaar</b>
 						</label>
 					</div>
-					<Button text="Wijzig status" style={{ marginBottom: '2rem' }} />
+					<Button text="Wijzig status" />
 				</form>
 			</Section>
 			<Section title="Extra tijd">
 				<div className={style.flexContainer} style={{ marginBottom: '2rem' }}>
-					<Button text="+ 1 min" className={'mt-5 mr-2' + (eenMinuutButton && ' bg-green-600 text-white') ?? ''} click={() => {
-						setEenMinuutButton(true);
-						setVijfMinuutButton(false);
-						setTienMinuutButton(false);
-					}} />
-					<Button text="+ 5 min" className={'mt-5 ml-1 mr-1' + (vijfMinuutButton && ' bg-green-600 text-white') ?? ''} click={() => {
-						setEenMinuutButton(false);
-						setVijfMinuutButton(true)
-						setTienMinuutButton(false);
-
-					}} />
-					<Button text="+ 10 min" className={'mt-5 mr-2' + (tienMinuutButton && ' bg-green-600 text-white') ?? ''} click={() => {
-						setEenMinuutButton(false);
-						setVijfMinuutButton(false);
-						setTienMinuutButton(true)
-					}} />
+					<Button text="+ 1 min" className={'mt-5 mr-2 ' + (selectedButton?.een === true ? 'bg-green-600 text-white' : '')} disabled={selectedButton?.een} click={() => wijzigMinuten({ een: true, vijf: false, tien: false })} />
+					<Button text="+ 5 min" className={'mt-5 ml-1 mr-1 ' + (selectedButton?.vijf === true ? 'bg-green-600 text-white' : '')} disabled={selectedButton?.vijf} click={() => wijzigMinuten({ een: false, vijf: true, tien: false })} />
+					<Button text="+ 10 min" className={'mt-5 ml-2 ' + (selectedButton?.tien === true ? 'bg-green-600 text-white' : '')} disabled={selectedButton?.tien} click={() => wijzigMinuten({ een: false, vijf: false, tien: true })} />
 				</div>
 			</Section>
 			<Section title="Vragen">

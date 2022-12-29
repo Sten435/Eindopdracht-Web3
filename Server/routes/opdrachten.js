@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/', async (req, res) => {
 	const opdrachten = await getOpdrachten();
-	return res.json(opdrachten);
+	return res.json({ message: 'success', error: false, loggedIn: true, opdrachten });
 });
 
 router.get('/:id', async (req, res) => {
@@ -18,7 +18,7 @@ router.get('/:id', async (req, res) => {
 
 	const { naam, beschrijving, minuten } = opdracht.opdracht;
 
-	return res.json({ naam, beschrijving, minuten });
+	return res.json({ message: 'success', error: false, loggedIn: true, opdracht: { naam, beschrijving, minuten } });
 });
 
 router.post('/vraag', async (req, res) => {
@@ -51,7 +51,7 @@ router.get('/vraag/:studentId/:opdrachtId', async (req, res) => {
 
 	const vragen = await getVragenByStudentAndOpdrachtId(studentId, opdrachtId);
 
-	return res.json(vragen.map((v) => v.vraag));
+	return res.json({ message: 'success', error: false, loggedIn: true, vragen: vragen.map((v) => v.vraag) });
 });
 
 export default router;

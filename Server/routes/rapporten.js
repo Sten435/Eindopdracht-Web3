@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getOpdrachtById } from '../controllers/opdrachten_controller.js';
 import { getStudentById } from '../controllers/user_controller.js';
-import { insertRapport, getRapportByStudentIdAndOpdrachtId, wijzigRapport } from '../controllers/rapport_controller.js';
+import { insertRapport, getRapportByStudentIdAndOpdrachtId, wijzigRapport, getRapport, getRapportenByOpdrachtId } from '../controllers/rapport_controller.js';
 
 const router = Router();
 
@@ -22,6 +22,50 @@ router.post('/start', async (req, res) => {
 	await insertRapport(studentId, opdrachtId);
 
 	return res.json({ message: 'success', error: false, loggedIn: true });
+});
+
+router.get('/:opdrachtId', async (req, res) => {
+	const { opdrachtId } = req.params;
+	if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
+
+	const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
+	if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
+
+	const result = await getRapportenByOpdrachtId(opdrachtId);
+
+	return res.json({
+		message: 'success',
+		error: false,
+		loggedIn: true,
+		rapporten: result.map((rapport) => {
+			return {
+				student: rapport.student[0],
+				status: rapport.status,
+				vragen: rapport.vragen.map((v) => v.vraag),
+				extraMinuten: rapport.extraMinuten,
+				aanmaakDatum: rapport.aanmaakDatum,
+			};
+		}),
+	});
+});
+
+router.get('/:studentId/:opdrachtId', async (req, res) => {
+	const { studentId, opdrachtId } = req.params;
+	if (!studentId) return res.json({ message: 'studentId is niet geldig', error: true, loggedIn: true });
+	if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
+
+	const bestaatStudentId = await getStudentById(studentId);
+	if (!bestaatStudentId.found) return res.json({ message: 'studentId bestaat niet', error: true, loggedIn: true });
+
+	const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
+	if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
+
+	const bestaatRapport = await getRapportByStudentIdAndOpdrachtId(studentId, opdrachtId);
+	if (!bestaatRapport.found) return res.json({ message: 'Rapport bestaat niet', error: true, loggedIn: true });
+
+	const { status, verwijderd, extraMinuten, aanmaakDatum } = await getRapport(studentId, opdrachtId);
+
+	return res.json({ message: 'success', error: false, loggedIn: true, rapport: { status, verwijderd, extraMinuten, aanmaakDatum } });
 });
 
 const statusen = ['bezig', 'ik doe niet mee', 'ik geef op', 'ik ben klaar'];

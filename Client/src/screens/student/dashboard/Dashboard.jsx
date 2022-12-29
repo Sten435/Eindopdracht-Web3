@@ -1,9 +1,8 @@
 import React from 'react';
 import Header from '../../../components/header/Header';
-import Card from '../../../components/card/Card';
 import style from './dashboard.module.css';
-import CardGrid from '../../../components/cardGrid/CardGrid';
 import LoadPage from '../../../controller/loadPage';
+import OpdrachtenLijst from '../../../components/opdrachtenLijst/OpdrachtenLijst';
 
 const Dashboard = () => {
 	const { response, loading, error } = LoadPage('/opdrachten', 'GET');
@@ -13,16 +12,13 @@ const Dashboard = () => {
 	} else if (loading) {
 		return <p>Loading...</p>;
 	} else {
-		const opdrachten = response['Testdemonstratie SeattleFlights'];
+		const { opdrachten } = response;
 
 		return (
 			<main className={style.main}>
 				<Header title="Student Dashboard" name="student stan" metTerugButton={false} />
-				<CardGrid>
-					{opdrachten.map((opdracht, index) => {
-						return <Card to={`/student/opdracht/${opdracht?.id}`} opdracht={opdracht} key={index} />;
-					})}
-				</CardGrid>
+				{!opdrachten && <h1 className="text-4xl text-center mt-5 font-bold">Er zijn geen opdrachten</h1>}
+				{opdrachten && <OpdrachtenLijst opdrachten={opdrachten} type="student" />}
 			</main>
 		);
 	}

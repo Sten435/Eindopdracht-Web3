@@ -25,6 +25,7 @@ export const getStudentFromDb = async (email) => {
 		const students = database.collection('studenten');
 
 		const result = await students.find({ email: email }).toArray();
+
 		if (result.length > 0) return result[0];
 		return null;
 	} finally {

@@ -11,7 +11,6 @@ import auth from './middleware/auth.js';
 import homeRoute from './routes/index.js';
 import loginRoute from './routes/login.js';
 import logoutRoute from './routes/logout.js';
-import studentRoute from './routes/student.js';
 import opdrachtenRoute from './routes/opdrachten.js';
 import rapportenRoute from './routes/rapporten.js';
 import importFileRoute from './routes/csv.js';
@@ -40,7 +39,6 @@ app.use('/import', importFileRoute);
 app.use('/auth', authRoute);
 app.use('/opdrachten', opdrachtenRoute);
 app.use('/rapporten', rapportenRoute);
-app.use('/students', studentRoute);
 
 console.clear();
 app.listen(port, () => console.log(`http://localhost:${port}`));
