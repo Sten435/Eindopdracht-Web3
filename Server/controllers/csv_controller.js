@@ -10,8 +10,8 @@ export const insertOpdracht = async (opdrachten) => {
 				// naam: opdracht[1],
 				beschrijving: opdracht[2],
 				seconden: opdracht[3] * 60,
-				status: 'Niet gestart',
-				startDatum: '',
+				verwijderd: false,
+				startDatum: null,
 			};
 		})
 		.filter((o) => o !== undefined) // verwijder header van csv

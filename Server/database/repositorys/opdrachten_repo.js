@@ -42,6 +42,28 @@ export const getVragenByStudentAndOpdrachtIdFromDB = async (studentId, opdrachtI
 	return data;
 };
 
+export const startOpdrachtInDB = async (opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { startDatum: new Date().toISOString() } });
+
+	return result;
+};
+
+export const stopOpdrachtInDB = async (opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { gestoptDoorHost: true } });
+
+	return result;
+};
+
 export const insertVraagInDB = async (studentId, opdrachtId, vraag) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

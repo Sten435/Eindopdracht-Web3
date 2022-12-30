@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 
-const CountdownTimer = (props) => {
-	const [countdown, setCountdown] = useState(props.seconden);
+const CountdownTimer = ({ seconden, onEnd = null }) => {
+	const [countdown, setCountdown] = useState(seconden);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setCountdown(countdown - 1);
 		}, 1000);
 
+		if (countdown <= 0 && onEnd) onEnd();
+
 		return () => clearInterval(interval);
-	}, [countdown]);
+	}, [countdown, onEnd, seconden]);
 
 	if (countdown <= 0) {
-		return 'Gedaan';
+		return '';
 	}
 
 	const hours = Math.floor(countdown / 3600);

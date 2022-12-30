@@ -5,7 +5,7 @@ export const insertRapportInDB = async (studentId, opdrachtId) => {
 	const client = new MongoClient(uri);
 
 	try {
-		const rapport = { studentId: ObjectId(studentId), opdrachtId: ObjectId(opdrachtId), status: 'bezig', extraMinuten: '', verwijderd: false, aanmaakDatum: new Date().toISOString() };
+		const rapport = { studentId: ObjectId(studentId), opdrachtId: ObjectId(opdrachtId), status: 'bezig', extraMinuten: null, verwijderd: false, aanmaakDatum: new Date().toISOString() };
 
 		const database = client.db('web3');
 		const rapporten = database.collection('rapporten');
