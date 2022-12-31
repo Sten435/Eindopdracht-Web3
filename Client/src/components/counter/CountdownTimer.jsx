@@ -4,6 +4,10 @@ const CountdownTimer = ({ seconden, onEnd = null }) => {
 	const [countdown, setCountdown] = useState(seconden);
 
 	useEffect(() => {
+		if (seconden !== countdown) setCountdown(seconden);
+	}, [seconden]);
+
+	useEffect(() => {
 		const interval = setInterval(() => {
 			setCountdown(countdown - 1);
 		}, 1000);
@@ -11,7 +15,7 @@ const CountdownTimer = ({ seconden, onEnd = null }) => {
 		if (countdown <= 0 && onEnd) onEnd();
 
 		return () => clearInterval(interval);
-	}, [countdown, onEnd, seconden]);
+	}, [countdown, seconden]);
 
 	if (countdown <= 0) {
 		return;

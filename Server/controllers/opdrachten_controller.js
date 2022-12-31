@@ -1,4 +1,5 @@
-import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, stopOpdrachtInDB } from '../database/repositorys/opdrachten_repo.js';
+import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, stopOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB } from '../database/repositorys/opdrachten_repo.js';
+import { getRapportenByOpdrachtId } from '../controllers/rapport_controller.js';
 
 export const getOpdrachten = async () => {
 	const result = await getOpdrachtenFromDB();
@@ -80,8 +81,33 @@ export const getOpdrachtById = async (opdrachtId) => {
 	return { found: true, opdracht: opdracht };
 };
 
+export const getGemiddeldeExtraTijdInMinuten = async (opdrachtId) => {
+	const rapporten = await getRapportenByOpdrachtId(opdrachtId);
+
+	const rapportenMetExtraMinuten = rapporten.filter((rapport) => rapport.extraMinuten);
+	if (rapportenMetExtraMinuten.length === 0) return 0;
+
+	const extraMinuten = rapportenMetExtraMinuten.reduce((acc, rapport) => acc + rapport.extraMinuten, 0) / rapportenMetExtraMinuten.length;
+
+	return extraMinuten;
+};
+
 export const startOpdracht = async (opdrachtId) => {
 	return await startOpdrachtInDB(opdrachtId);
+};
+
+export const wijzigExtraTijdVragen = async (opdrachtId, newValueExtraTijd) => {
+	return await wijzigExtraTijdVragenInDB(opdrachtId, newValueExtraTijd);
+};
+
+export const voegExtraTijdToe = async (opdrachtId) => {
+	const gemiddeldeExtraMinuten = await getGemiddeldeExtraTijdInMinuten(opdrachtId);
+
+	console.log(gemiddeldeExtraMinuten);
+
+	await voegExtraTijdToeInDB(opdrachtId, gemiddeldeExtraMinuten);
+
+	return gemiddeldeExtraMinuten;
 };
 
 export const stopOpdracht = async (opdrachtId) => {

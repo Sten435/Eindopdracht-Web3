@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -16,15 +18,24 @@ import rapportenRoute from './routes/rapporten.js';
 import importFileRoute from './routes/csv.js';
 import authRoute from './routes/auth.js';
 
+import opdrachten from './sockets/opdrachten.js';
+
 const app = express();
 const port = process.env.PORT || 5000;
+const server = http.createServer(app);
+const io = new Server(server, {
+	cors: {
+		origin: ['http://localhost:3000', 'http://localhost:5000'],
+		credentials: true,
+	},
+});
 
 app.use(helmet()); // secure apps by setting various HTTP headers
 app.use(
 	cors({
 		credentials: true,
 		origin: ['http://localhost:3000', 'http://localhost:5000'],
-	})
+	}),
 );
 app.use(cookieParser()); // json limit
 app.use(bodyParser.urlencoded({ extended: false, limit: '2MB' }));
@@ -40,5 +51,7 @@ app.use('/auth', authRoute);
 app.use('/opdrachten', opdrachtenRoute);
 app.use('/rapporten', rapportenRoute);
 
+io.use(opdrachten);
+
 console.clear();
-app.listen(port, () => console.log(`http://localhost:${port}`));
+server.listen(port, () => console.log(`http://localhost:${port}`));

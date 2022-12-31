@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Fetch from './fetch';
 import axios from 'axios';
+import { WEBSOCKET_API_URL } from '../config.js';
+import { io as socketIo } from 'socket.io-client';
 
 const LoadPage = (url = '', method = '', withAuth = true) => {
 	const [response, setResponse] = useState(null);
@@ -11,11 +13,13 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 
 	const navigate = useNavigate();
 	const location = useLocation();
+	const io = new socketIo([WEBSOCKET_API_URL, 'ws://localhost:3000']);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			setLoading(true);
 			try {
+				setLoading(true);
+
 				if (withAuth) {
 					try {
 						axios.defaults.withCredentials = true;
@@ -24,6 +28,9 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 							if (location.pathname === '/') return;
 							return navigate('/logout', { replace: true });
 						} else {
+							io.on('connect', (_socket) => {
+								io.join('client');
+							});
 							if (location.pathname === '/') return navigate('/student/dashboard');
 							else if (!user) setUser({ ...data.user });
 						}
@@ -51,7 +58,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		fetchData();
 	}, [url, navigate, withAuth, method, location.pathname, user]);
 
-	return { response, error, loading, user };
+	return { response, error, loading, user, socket: io };
 };
 
 export default LoadPage;

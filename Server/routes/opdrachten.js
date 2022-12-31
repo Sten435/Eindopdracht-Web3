@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht } from '../controllers/opdrachten_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijdInMinuten } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
@@ -36,6 +36,55 @@ router.post('/status', async (req, res) => {
 		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 
 		return res.json({ message: 'success', error: false, loggedIn: true, status: bestaatOpdrachtId.opdracht.status });
+	} catch (error) {
+		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
+	}
+});
+
+router.post('/wijzigExtraTijdVragen', async (req, res) => {
+	try {
+		const { opdrachtId } = req.body;
+		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
+
+		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
+
+		await wijzigExtraTijdVragen(opdrachtId, !bestaatOpdrachtId.opdracht.kanStudentExtraTijdVragen);
+
+		return res.json({ message: 'success', error: false, loggedIn: true, status: bestaatOpdrachtId.opdracht.status });
+	} catch (error) {
+		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
+	}
+});
+
+router.post('/voegExtraTijdToe', async (req, res) => {
+	try {
+		const { opdrachtId } = req.body;
+		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
+
+		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
+
+		const result = await voegExtraTijdToe(opdrachtId, bestaatOpdrachtId.opdracht);
+
+		return res.json({ message: 'success', error: false, loggedIn: true, result });
+	} catch (error) {
+		console.log(error);
+		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
+	}
+});
+
+router.get('/extraTijd/:opdrachtId', async (req, res) => {
+	try {
+		const { opdrachtId } = req.params;
+		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
+
+		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
+
+		const seconden = await getGemiddeldeExtraTijdInMinuten(opdrachtId);
+
+		return res.json({ message: 'success', error: false, loggedIn: true, result: { seconden } });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
 	}

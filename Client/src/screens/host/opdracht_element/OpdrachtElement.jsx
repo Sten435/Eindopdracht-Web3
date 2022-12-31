@@ -1,4 +1,4 @@
-import { FaCheck, FaClock, FaLock, FaLockOpen } from 'react-icons/fa';
+import { FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { Button, Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
@@ -18,20 +18,68 @@ const OpdrachtElement = () => {
 	const [isOpdrachtBeeindigd, setIsOpdrachtGestopt] = useState(false);
 	const [isTijdAfgelopen, setIsTijdAfgelopen] = useState(false);
 	const [extraTijdToegestaan, setExtraTijdToegestaan] = useState(false);
+	const [gemiddeldeExtraTijd, setGemiddeldeExtraTijd] = useState(0);
+	const [timerTijd, setTimerTijd] = useState();
 
-	const [resterendeTijd, setResterendeTijd] = useState();
+	const { response, loading, error, socket } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
-	const { response, loading, error } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
+	const getGemiddeldeExtraTijd = async (opdrachtId) => {
+		const result3 = await Fetch(`/opdrachten/extraTijd/${opdrachtId}`, 'GET');
+		if (result3.error) return alert(result3.message);
+
+		const { seconden } = result3.result;
+
+		setGemiddeldeExtraTijd(seconden);
+	};
+
+	const startOpdracht = async () => {
+		const result = await Fetch('/opdrachten/start', 'POST', { opdrachtId: opdrachtId });
+		if (result.error) return alert(result.message);
+
+		const result2 = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
+		if (result2.error) return alert(result2.message);
+
+		setTimerTijd(result2.opdracht.seconden);
+		setIsOpdrachtGestart(true);
+	};
+
+	const stopOpdracht = async () => {
+		const result = await Fetch('/opdrachten/stop', 'POST', { opdrachtId: opdrachtId });
+		if (result.error) return alert(result.message);
+
+		setIsOpdrachtGestopt(true);
+	};
+
+	const wijzigKanStudentExtraTijdVragen = async () => {
+		const result = await Fetch('/opdrachten/wijzigExtraTijdVragen', 'POST', { opdrachtId: opdrachtId });
+		if (result.error) return alert(result.message);
+
+		setExtraTijdToegestaan(!extraTijdToegestaan);
+	};
+
+	const voegGemiddeldeExtraTijdToe = async () => {
+		console.log('click op checkbox');
+		Fetch('/opdrachten/voegExtraTijdToe', 'POST', { opdrachtId: opdrachtId }).then(async (result) => {
+			if (result.error) return alert(result.message);
+
+			setTimerTijd(Math.floor(result.result * 60 + timerTijd));
+			getGemiddeldeExtraTijd(opdrachtId);
+		});
+	};
 
 	useEffect(() => {
 		if (!response) return;
 		if (response.opdracht.startDatum) setIsOpdrachtGestart(true);
 		if (response.opdracht.seconden === 0 && response.opdracht.startDatum != null) setIsTijdAfgelopen(true);
 		if (response.opdracht.gestoptDoorHost) setIsOpdrachtGestopt(true);
-		if (response.opdracht.seconden) setResterendeTijd(response.opdracht.seconden);
-		console.log(response.opdracht);
-		if (response.opdracht.extraTijdToegestaan) setExtraTijdToegestaan(true);
-	}, [response]);
+		if (response.opdracht.seconden) setTimerTijd(response.opdracht.seconden);
+		if (response.opdracht.kanStudentExtraTijdVragen) setExtraTijdToegestaan(true);
+		getGemiddeldeExtraTijd(opdrachtId);
+
+		socket.on('vraagHulp', ({ userId }) => {
+			console.log('student :', userId);
+		});
+	}, [response, opdrachtId]);
 
 	if (error) return <h1>Er is iets fout gegaan</h1>;
 	if (loading) return <h1>Loading...</h1>;
@@ -41,30 +89,12 @@ const OpdrachtElement = () => {
 
 	const titel = opdracht.beschrijving;
 
-	const startOpdracht = () => {
-		Fetch('/opdrachten/start', 'POST', { opdrachtId: opdrachtId }).then((result) => {
-			if (result.error) return alert(result.message);
-			Fetch(`/rapporten/${opdrachtId}`, 'GET').then((result) => {
-				if (result.error) return alert(result.message);
-				setResterendeTijd(result.opdracht.seconden);
-				setIsOpdrachtGestart(true);
-			});
-		});
-	};
-
-	const stopOpdracht = () => {
-		Fetch('/opdrachten/stop', 'POST', { opdrachtId: opdrachtId }).then((result) => {
-			if (result.error) return alert(result.message);
-			setIsOpdrachtGestopt(true);
-		});
-	};
-
 	let actieButton;
 	if (!isOpdrachtGestart && !isTijdAfgelopen) {
 		actieButton = (
 			<Button
 				text='Start'
-				className='m-0 ml-2 text-2xl'
+				className='m-0 text-2xl'
 				click={startOpdracht}
 				referace={actieButtonRef}
 			/>
@@ -74,7 +104,7 @@ const OpdrachtElement = () => {
 			actieButton = (
 				<Button
 					text='Beëindig'
-					className='m-0 ml-2 text-2xl'
+					className='m-0 text-2xl'
 					click={stopOpdracht}
 					referace={actieButtonRef}
 				/>
@@ -83,13 +113,13 @@ const OpdrachtElement = () => {
 	}
 
 	let countDownTimer;
-	if (isOpdrachtGestart && !isOpdrachtBeeindigd && resterendeTijd) {
+	if (isOpdrachtGestart && !isOpdrachtBeeindigd && timerTijd) {
 		countDownTimer = (
-			<div className='text-2xl pb-1 pl-2 pr-2 pt-1 mr-2 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>
+			<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>
 				<CountdownTimer
-					seconden={resterendeTijd}
+					seconden={timerTijd}
 					onEnd={() => {
-						setResterendeTijd(null);
+						setTimerTijd(null);
 						setIsTijdAfgelopen(true);
 					}}
 				/>
@@ -97,8 +127,15 @@ const OpdrachtElement = () => {
 		);
 	} else if (isOpdrachtBeeindigd) {
 		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>Opdracht is beeindigd</div>;
-	} else if (isTijdAfgelopen || !resterendeTijd) {
+	} else if (isTijdAfgelopen || !timerTijd) {
 		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>Tijd is afgelopen</div>;
+	}
+
+	let extraTijdButton;
+	if (extraTijdToegestaan) {
+		extraTijdButton = <FaLockOpen />;
+	} else {
+		extraTijdButton = <FaLock />;
 	}
 
 	return (
@@ -108,24 +145,28 @@ const OpdrachtElement = () => {
 				name='host stan'
 			/>
 			<div className='flex justify-center items-center flex-col'>
-				<div className='flex justify-around'>
-					{countDownTimer}
-					{actieButton}
+				<div className='flex w-80 justify-between'>
+					<div className='w-full flex justify-center'>{countDownTimer}</div>
+					<div className='w-full flex justify-center'>{actieButton}</div>
 				</div>
 				{isOpdrachtGestart && !isOpdrachtBeeindigd && (
-					<div className='w-80 flex justify-around mt-5 flex-row '>
-						<div className={'text-2xl pb-2 pl-2 pr-2 pt-2 text-white font-bold rounded-md ' + (extraTijdToegestaan ? 'bg-green-500' : 'bg-red-500')}>{extraTijdToegestaan ? <FaLockOpen cursor='pointer' /> : <FaLock cursor='pointer' />}</div>
-						<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-orange-500 font-bold rounded-md '>
-							<h1 className='text-xl flex justify-center items-center'>
-								<FaClock
-									className='mr-3 ml-1'
-									size={25}
-								/>
-								<i className='mr-1'>+ 10 Min</i>
-							</h1>
+					<div className='flex w-80 mt-5 justify-between'>
+						<div className='w-full flex justify-center'>
+							<div
+								className={'text-2xl flex justify-center pb-2 pl-2 w-20 pr-2 pt-2 text-white font-bold cursor-pointer rounded-md ' + (extraTijdToegestaan ? 'bg-green-500' : 'bg-red-500')}
+								onClick={wijzigKanStudentExtraTijdVragen}>
+								{extraTijdButton}
+							</div>
 						</div>
-						<div className='text-2xl pb-2 pl-2 pr-2 pt-2 text-white bg-green-500 font-bold rounded-md '>
-							<FaCheck cursor='pointer' />
+						<div className='w-full flex justify-center'>
+							<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-orange-500 font-bold rounded-md '>
+								<span
+									className='text-xl cursor-pointer hover:underline flex justify-center items-center'
+									onClick={voegGemiddeldeExtraTijdToe}>
+									<FaPlusSquare className='mr-3 ml-1' />
+									<i>{gemiddeldeExtraTijd} min</i>
+								</span>
+							</div>
 						</div>
 					</div>
 				)}

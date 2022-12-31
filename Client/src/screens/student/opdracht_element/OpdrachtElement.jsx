@@ -23,7 +23,7 @@ const OpdrachtElement = () => {
 	const bezigStatusRef = useRef();
 
 	const result = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
-	const { response, loading, error, user } = result;
+	const { response, loading, error, user, socket } = result;
 
 	const getRapportInfo = async () => {
 		const result = await Fetch(`/rapporten/${user._id}/${opdrachtId}`, 'GET');
@@ -127,6 +127,10 @@ const OpdrachtElement = () => {
 		if (result.error) return alert(result.message);
 	};
 
+	const vraagHulp = async () => {
+		socket.in('client').emit('vraagHulp', { opdrachtId, userId: user._id });
+	};
+
 	return (
 		<main className={style.main}>
 			<Header
@@ -161,6 +165,7 @@ const OpdrachtElement = () => {
 							<Button
 								className='mt-8 ml-5 text-2xl'
 								text='Vraag Hulp 🤘'
+								click={vraagHulp}
 							/>
 						)}
 					</div>

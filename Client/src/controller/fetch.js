@@ -1,4 +1,4 @@
-import API_URL from '../config';
+import { API_URL } from '../config';
 import axios from 'axios';
 
 const Fetch = async (url = '', method = '', body = {}) => {
