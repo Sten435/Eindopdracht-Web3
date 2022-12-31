@@ -12,13 +12,23 @@ const Dashboard = () => {
 	} else if (loading) {
 		return <p>Loading...</p>;
 	} else {
+		if (response.error) return alert(response.error.message);
 		const { opdrachten } = response;
 
 		return (
 			<main className={style.main}>
-				<Header title="Student Dashboard" name="student stan" metTerugButton={false} />
-				{!opdrachten && <h1 className="text-4xl text-center mt-5 font-bold">Er zijn geen opdrachten</h1>}
-				{opdrachten && <OpdrachtenLijst opdrachten={opdrachten} type="student" />}
+				<Header
+					title='Student Dashboard'
+					name='student stan'
+					metTerugButton={false}
+				/>
+				{!opdrachten && <h1 className='text-4xl text-center mt-5 font-bold'>Er zijn geen opdrachten</h1>}
+				{opdrachten && (
+					<OpdrachtenLijst
+						opdrachten={opdrachten}
+						type='student'
+					/>
+				)}
 			</main>
 		);
 	}

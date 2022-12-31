@@ -14,7 +14,7 @@ const CountdownTimer = ({ seconden, onEnd = null }) => {
 	}, [countdown, onEnd, seconden]);
 
 	if (countdown <= 0) {
-		return '';
+		return;
 	}
 
 	const hours = Math.floor(countdown / 3600);

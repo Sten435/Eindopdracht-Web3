@@ -14,7 +14,7 @@ export const getOpdrachtenFromDB = async () => {
 		if (!dictionary[item.naam]) {
 			dictionary[item.naam] = [];
 		}
-		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden });
+		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden, naam: item.naam, verwijderd: item.verwijderd, startDatum: item.startDatum, kanStudentExtraTijdVragen: item.kanStudentExtraTijdVragen, gestoptDoorHost: item.gestoptDoorHost });
 	});
 
 	return dictionary;
@@ -27,17 +27,6 @@ export const getOpdrachtByIdFromDB = async (opdrachtId) => {
 	const opdrachten = database.collection('opdrachten');
 
 	const data = await opdrachten.find({ _id: ObjectId(opdrachtId) }).toArray();
-
-	return data;
-};
-
-export const getVragenByStudentAndOpdrachtIdFromDB = async (studentId, opdrachtId) => {
-	const uri = process.env.MONGODB_URI;
-	const client = new MongoClient(uri);
-	const database = client.db('web3');
-	const opdrachten = database.collection('vragen');
-
-	const data = await opdrachten.find({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] }).toArray();
 
 	return data;
 };
@@ -62,21 +51,4 @@ export const stopOpdrachtInDB = async (opdrachtId) => {
 	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { gestoptDoorHost: true } });
 
 	return result;
-};
-
-export const insertVraagInDB = async (studentId, opdrachtId, vraag) => {
-	const uri = process.env.MONGODB_URI;
-	const client = new MongoClient(uri);
-	const database = client.db('web3');
-	const opdrachten = database.collection('vragen');
-
-	const vraagObject = {
-		studentId: ObjectId(studentId),
-		opdrachtId: ObjectId(opdrachtId),
-		vraag,
-	};
-
-	const data = await opdrachten.insertOne(vraagObject);
-
-	return data;
 };

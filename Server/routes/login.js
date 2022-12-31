@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 
 		const token = createToken({ _id, gebruikersNaam, familieNaam, voorNaam, email, sorteerNaam, cursusGroep });
 
-		res.cookie('token', token, { secure: false, httpOnly: true, maxAge: 8 * 60 * 60 * 1000, sameSite: 'Lax' });
+		res.cookie('token', token, { secure: false, httpOnly: true, maxAge: parseInt(process.env.TOKEN_EXPIRES) * 60 * 60 * 1000, sameSite: 'Lax' });
 		res.json({ message: 'succesfully logged in', error: false, loggedIn: true });
 	} catch (error) {
 		res.json({ message: error.message, error: true, loggedIn: false });

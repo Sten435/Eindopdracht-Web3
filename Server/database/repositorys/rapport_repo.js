@@ -71,6 +71,34 @@ export const getRapportenByOpdrachtIdFromDb = async (opdrachtId) => {
 	}
 };
 
+export const insertVraagInDB = async (studentId, opdrachtId, vraag) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('vragen');
+
+	const vraagObject = {
+		studentId: ObjectId(studentId),
+		opdrachtId: ObjectId(opdrachtId),
+		vraag,
+	};
+
+	const data = await opdrachten.insertOne(vraagObject);
+
+	return data;
+};
+
+export const getVragenByStudentAndOpdrachtIdFromDB = async (studentId, opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('vragen');
+
+	const data = await opdrachten.find({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] }).toArray();
+
+	return data;
+};
+
 export const wijzigRapportInDB = async (studentId, opdrachtId, actie, actieNaam) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

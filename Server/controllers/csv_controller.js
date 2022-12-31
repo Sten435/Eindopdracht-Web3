@@ -12,6 +12,8 @@ export const insertOpdracht = async (opdrachten) => {
 				seconden: opdracht[3] * 60,
 				verwijderd: false,
 				startDatum: null,
+				kanStudentExtraTijdVragen: true,
+				gestoptDoorHost: false,
 			};
 		})
 		.filter((o) => o !== undefined) // verwijder header van csv

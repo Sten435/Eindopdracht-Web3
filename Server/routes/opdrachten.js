@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, insertVraag, getVragenByStudentAndOpdrachtId, startOpdracht, stopOpdracht } from '../controllers/opdrachten_controller.js';
-import { getStudentById } from '../controllers/user_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
 	try {
-		const opdrachten = await getOpdrachten();
+		let opdrachten = await getOpdrachten();
+
 		return res.json({ message: 'success', error: false, loggedIn: true, opdrachten });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
@@ -21,32 +21,23 @@ router.get('/:id', async (req, res) => {
 		const opdracht = await getOpdrachtById(id);
 		if (!opdracht.found) return res.json({ message: 'opdracht niet gevonden', error: true, loggedIn: true });
 
-		const { naam, beschrijving, seconden } = opdracht.opdracht;
-
-		return res.json({ message: 'success', error: false, loggedIn: true, opdracht: { naam, beschrijving, seconden } });
+		return res.json({ message: 'success', error: false, loggedIn: true, opdracht: opdracht.opdracht });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
 	}
 });
 
-router.post('/vraag', async (req, res) => {
+router.post('/status', async (req, res) => {
 	try {
-		const { studentId, opdrachtId, vraag } = req.body;
-		if (!studentId) return res.json({ message: 'studentId is niet geldig', error: true, loggedIn: true });
+		const { opdrachtId } = req.body;
 		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
-		if (!vraag) return res.json({ message: 'vraag is niet geldig', error: true, loggedIn: true });
-
-		const bestaatStudentId = await getStudentById(studentId);
-		if (!bestaatStudentId.found) return res.json({ message: 'studentId bestaat niet', error: true, loggedIn: true });
 
 		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
-		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 
-		await insertVraag(studentId, opdrachtId, vraag);
-
-		return res.json({ message: 'success', error: false, loggedIn: true });
+		return res.json({ message: 'success', error: false, loggedIn: true, status: bestaatOpdrachtId.opdracht.status });
 	} catch (error) {
-		return res.json({ message: error.message, error: true, loggedIn: true });
+		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
 	}
 });
 
@@ -56,7 +47,7 @@ router.post('/start', async (req, res) => {
 		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
 
 		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
-		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 
 		await startOpdracht(opdrachtId);
 
@@ -73,7 +64,7 @@ router.post('/stop', async (req, res) => {
 		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
 
 		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
-		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
+		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 		if (bestaatOpdrachtId.opdracht.gestoptDoorHost) return res.json({ message: 'opdracht is al gestopt', error: true, loggedIn: true });
 
 		await stopOpdracht(opdrachtId);
@@ -81,26 +72,6 @@ router.post('/stop', async (req, res) => {
 		return res.json({ message: 'success', error: false, loggedIn: true });
 	} catch (error) {
 		console.log(error);
-		return res.json({ message: error.message, error: true, loggedIn: true });
-	}
-});
-
-router.get('/vraag/:studentId/:opdrachtId', async (req, res) => {
-	try {
-		const { studentId, opdrachtId } = req.params;
-		if (!studentId) return res.json({ message: 'studentId is niet geldig', error: true, loggedIn: true });
-		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
-
-		const bestaatStudentId = await getStudentById(studentId);
-		if (!bestaatStudentId.found) return res.json({ message: 'studentId bestaat niet', error: true, loggedIn: true });
-
-		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
-		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdrachtId bestaat niet', error: true, loggedIn: true });
-
-		const vragen = await getVragenByStudentAndOpdrachtId(studentId, opdrachtId);
-
-		return res.json({ message: 'success', error: false, loggedIn: true, vragen: vragen.map((v) => v.vraag) });
-	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true });
 	}
 });

@@ -23,7 +23,13 @@ export const getUser = async (email) => {
 };
 
 export const getStudentById = async (studentId) => {
-	const user = await getStudentByIdFromDB(studentId);
+	let user;
+	try {
+		user = await getStudentByIdFromDB(studentId);
+	} catch (error) {
+		return { found: false };
+	}
+
 	if (!user) return { found: false };
 	if (user.length === 0) return { found: false };
 	return { found: true, user };

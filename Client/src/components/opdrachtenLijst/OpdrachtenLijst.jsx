@@ -6,11 +6,20 @@ const OpdrachtenLijst = ({ opdrachten, type }) => {
 	let opdrachtenLijst = [];
 	for (const key in opdrachten) {
 		opdrachtenLijst.push(
-			<Section title={key} key={key}>
+			<Section
+				title={key}
+				key={key}>
 				{opdrachten[key].map((opdracht, index) => {
-					return <Card to={`/${type}/opdracht/${opdracht.id}`} opdracht={opdracht} key={key + index} />;
+					if (type === 'student' && (opdracht.status === 'Beeindigd' || opdracht.status === 'Afgelopen')) return;
+					return (
+						<Card
+							to={`/${type}/opdracht/${opdracht.id}`}
+							opdracht={opdracht}
+							key={key + index}
+						/>
+					);
 				})}
-			</Section>
+			</Section>,
 		);
 	}
 

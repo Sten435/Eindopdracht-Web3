@@ -6,7 +6,7 @@ export const createToken = (object) => {
 			...object,
 		},
 		process.env.JWT,
-		{ expiresIn: '1h' }
+		{ expiresIn: parseInt(process.env.TOKEN_EXPIRES) * 60 * 60 * 1000 },
 	);
 
 	return token;
