@@ -18,8 +18,6 @@ import rapportenRoute from './routes/rapporten.js';
 import importFileRoute from './routes/csv.js';
 import authRoute from './routes/auth.js';
 
-import opdrachten from './sockets/opdrachten.js';
-
 const app = express();
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
@@ -51,7 +49,13 @@ app.use('/auth', authRoute);
 app.use('/opdrachten', opdrachtenRoute);
 app.use('/rapporten', rapportenRoute);
 
-io.use(opdrachten);
+io.on('connection', (socket) => {
+	socket.on('toClient', (data) => {
+		const action = data.action;
+		delete data.action;
+		socket.broadcast.emit(action, data);
+	});
+});
 
 console.clear();
 server.listen(port, () => console.log(`http://localhost:${port}`));

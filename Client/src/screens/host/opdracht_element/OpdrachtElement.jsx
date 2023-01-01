@@ -1,4 +1,4 @@
-import { FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
+import { FaExternalLinkSquareAlt, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { Button, Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
@@ -9,6 +9,8 @@ import Fetch from '../../../controller/fetch.js';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
@@ -20,6 +22,7 @@ const OpdrachtElement = () => {
 	const [extraTijdToegestaan, setExtraTijdToegestaan] = useState(false);
 	const [gemiddeldeExtraTijd, setGemiddeldeExtraTijd] = useState(0);
 	const [timerTijd, setTimerTijd] = useState();
+	const [hasPopUp, setHasPopUp] = useState(false);
 
 	const { response, loading, error, socket } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
@@ -58,7 +61,6 @@ const OpdrachtElement = () => {
 	};
 
 	const voegGemiddeldeExtraTijdToe = async () => {
-		console.log('click op checkbox');
 		Fetch('/opdrachten/voegExtraTijdToe', 'POST', { opdrachtId: opdrachtId }).then(async (result) => {
 			if (result.error) return alert(result.message);
 
@@ -75,11 +77,27 @@ const OpdrachtElement = () => {
 		if (response.opdracht.seconden) setTimerTijd(response.opdracht.seconden);
 		if (response.opdracht.kanStudentExtraTijdVragen) setExtraTijdToegestaan(true);
 		getGemiddeldeExtraTijd(opdrachtId);
-
-		socket.on('vraagHulp', ({ userId }) => {
-			console.log('student :', userId);
-		});
 	}, [response, opdrachtId]);
+
+	useEffect(() => {
+		if (!socket || !response) return;
+		socket.on('vraagHulp', (data) => {
+			if (response && hasPopUp) return setHasPopUp(false);
+			const { opdrachtId: opdrachtID, userId } = data;
+			console.log(response);
+			if (opdrachtID !== opdrachtId) return;
+
+			toast.warn('🦄 Wow so easy!', {
+				position: 'bottom-right',
+				autoClose: 5000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				theme: 'dark',
+			});
+		});
+		setHasPopUp(true);
+	}, [response]);
 
 	if (error) return <h1>Er is iets fout gegaan</h1>;
 	if (loading) return <h1>Loading...</h1>;
@@ -195,6 +213,7 @@ const OpdrachtElement = () => {
 					</div>
 				)}
 			</Section>
+			<ToastContainer />
 		</main>
 	);
 };

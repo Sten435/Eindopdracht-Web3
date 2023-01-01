@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock } from 'react-icons/fa';
+import { FaClock, FaClosedCaptioning } from 'react-icons/fa';
 import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
 import { BulletLijst, Button, Header, InputText, Section } from '../../../components/index.js';
 import Fetch from '../../../controller/fetch.js';
@@ -128,7 +128,8 @@ const OpdrachtElement = () => {
 	};
 
 	const vraagHulp = async () => {
-		socket.in('client').emit('vraagHulp', { opdrachtId, userId: user._id });
+		if (!socket) return console.log('socket is undefined');
+		socket.emit('toClient', { opdrachtId, userId: user._id, action: 'vraagHulp' });
 	};
 
 	return (
