@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const CountdownTimer = ({ seconden, onEnd = null }) => {
-	const [countdown, setCountdown] = useState(seconden);
+	const [countdown, setCountdown] = useState();
 
 	useEffect(() => {
 		if (seconden !== countdown) setCountdown(seconden);

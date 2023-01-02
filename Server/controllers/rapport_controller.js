@@ -1,4 +1,4 @@
-import { insertRapportInDB, getRapportByStudentIdAndOpdrachtIdInDB, wijzigRapportInDB, getRapportFromDb, getRapportenByOpdrachtIdFromDb, insertVraagInDB, getVragenByStudentAndOpdrachtIdFromDB } from '../database/repositorys/rapport_repo.js';
+import { insertRapportInDB, getRapportByStudentIdAndOpdrachtIdInDB, wijzigRapportInDB, getRapportFromDb, getRapportenByOpdrachtIdFromDb, insertVraagInDB, getVragenByStudentAndOpdrachtIdFromDB, deleteRapportFromDB } from '../database/repositorys/rapport_repo.js';
 
 export const insertRapport = async (studentId, opdrachtId) => {
 	return await insertRapportInDB(studentId, opdrachtId);
@@ -16,6 +16,10 @@ export const insertVraag = async (studentId, opdrachtId, vraag) => {
 	return await insertVraagInDB(studentId, opdrachtId, vraag);
 };
 
+export const deleteRapport = async (studentId, opdrachtId) => {
+	return await deleteRapportFromDB(studentId, opdrachtId);
+};
+
 export const getRapportByStudentIdAndOpdrachtId = async (studentId, opdrachtId) => {
 	const result = await getRapportByStudentIdAndOpdrachtIdInDB(studentId, opdrachtId);
 	if (!result) return { found: false };
@@ -30,7 +34,7 @@ export const getVragenByStudentAndOpdrachtId = async (studentId, opdrachtId) => 
 export const wijzigRapport = async (studentId, opdrachtId, actie, actieNaam) => {
 	const { rapport } = await getRapportByStudentIdAndOpdrachtId(studentId, opdrachtId);
 
-	if (actieNaam === 'extraTijd' && rapport.extraMinuten === actie) throw new Error('extraTijd is al gelijk aan de actie');
+	if (actieNaam === 'extraTijd' && rapport.extraTijd === actie) throw new Error('extraTijd is al gelijk aan de actie');
 	if (actieNaam === 'status' && rapport.status === actie) throw new Error('status is al gelijk aan de actie');
 
 	return await wijzigRapportInDB(studentId, opdrachtId, actie, actieNaam);

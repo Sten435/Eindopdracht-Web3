@@ -1,4 +1,4 @@
-import { FaExternalLinkSquareAlt, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
+import { FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { Button, Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import { socket } from '../../../controller/socket.js';
 import 'react-toastify/dist/ReactToastify.css';
 
 const OpdrachtElement = () => {
@@ -22,9 +23,8 @@ const OpdrachtElement = () => {
 	const [extraTijdToegestaan, setExtraTijdToegestaan] = useState(false);
 	const [gemiddeldeExtraTijd, setGemiddeldeExtraTijd] = useState(0);
 	const [timerTijd, setTimerTijd] = useState();
-	const [hasPopUp, setHasPopUp] = useState(false);
 
-	const { response, loading, error, socket } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
+	const { response, setResponse, loading, error, user } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
 	const getGemiddeldeExtraTijd = async (opdrachtId) => {
 		const result3 = await Fetch(`/opdrachten/extraTijd/${opdrachtId}`, 'GET');
@@ -42,6 +42,8 @@ const OpdrachtElement = () => {
 		const result2 = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
 		if (result2.error) return alert(result2.message);
 
+		socket.emit('toClient', { opdrachtId, action: 'opdrachtGestart' });
+
 		setTimerTijd(result2.opdracht.seconden);
 		setIsOpdrachtGestart(true);
 	};
@@ -50,6 +52,7 @@ const OpdrachtElement = () => {
 		const result = await Fetch('/opdrachten/stop', 'POST', { opdrachtId: opdrachtId });
 		if (result.error) return alert(result.message);
 
+		socket.emit('toClient', { opdrachtId, action: 'stopOpdracht' });
 		setIsOpdrachtGestopt(true);
 	};
 
@@ -57,16 +60,76 @@ const OpdrachtElement = () => {
 		const result = await Fetch('/opdrachten/wijzigExtraTijdVragen', 'POST', { opdrachtId: opdrachtId });
 		if (result.error) return alert(result.message);
 
+		socket.emit('toClient', { opdrachtId, extraTijdToegestaan: !extraTijdToegestaan, action: 'wijzigKanStudentExtraTijdVragen' });
 		setExtraTijdToegestaan(!extraTijdToegestaan);
 	};
 
 	const voegGemiddeldeExtraTijdToe = async () => {
-		Fetch('/opdrachten/voegExtraTijdToe', 'POST', { opdrachtId: opdrachtId }).then(async (result) => {
-			if (result.error) return alert(result.message);
+		const result = await Fetch('/opdrachten/voegExtraTijdToe', 'POST', { opdrachtId: opdrachtId });
+		if (result.error) return alert(result.message);
 
-			setTimerTijd(Math.floor(result.result * 60 + timerTijd));
-			getGemiddeldeExtraTijd(opdrachtId);
-		});
+		setTimerTijd(Math.round(result.result * 60 + timerTijd));
+		getGemiddeldeExtraTijd(opdrachtId);
+
+		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'voegExtraTijdToe' });
+	};
+
+	const vraagHulpEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		const students = response.rapporten.filter(({ student }) => student._id === user._id).map((student) => student.student);
+		if (students.length === 0) return;
+
+		const student = students[0];
+
+		toast.warn(
+			<span className='flex justify-center'>
+				<p className='p-1 mb-1 bg-yellow-500 rounded font-bold w-fit text-black'>
+					{student.voorNaam.toUpperCase()} {student.familieNaam}
+				</p>
+			</span>,
+			{
+				position: 'bottom-right',
+				autoClose: false,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				theme: 'dark',
+				icon: () => (
+					<FaHandPaper
+						className='text-2xl'
+						color='#F1C40F'
+					/>
+				),
+			},
+		);
+	};
+
+	const addVraagEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		updateOpdrachten();
+	};
+
+	const addExtraTijdEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		updateOpdrachten();
+	};
+
+	const wijzigStatusEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		updateOpdrachten();
+	};
+
+	const updateOpdrachten = async () => {
+		const result = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
+		setResponse(result);
 	};
 
 	useEffect(() => {
@@ -80,23 +143,13 @@ const OpdrachtElement = () => {
 	}, [response, opdrachtId]);
 
 	useEffect(() => {
-		if (!socket || !response) return;
-		socket.on('vraagHulp', (data) => {
-			if (response && hasPopUp) return setHasPopUp(false);
-			const { opdrachtId: opdrachtID, userId } = data;
-			console.log(response);
-			if (opdrachtID !== opdrachtId) return;
-
-			toast.warn('🦄 Wow so easy!', {
-				position: 'bottom-right',
-				autoClose: 5000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				theme: 'dark',
-			});
-		});
-		setHasPopUp(true);
+		if (!response) return;
+		socket.on('vraagHulp', vraagHulpEvent);
+		socket.on('addVraag', addVraagEvent);
+		socket.on('startRapport', updateOpdrachten);
+		socket.on('wijzigExtraTijd', addExtraTijdEvent);
+		socket.on('wijzigStatus', wijzigStatusEvent);
+		return () => socket.off();
 	}, [response]);
 
 	if (error) return <h1>Er is iets fout gegaan</h1>;
@@ -200,9 +253,12 @@ const OpdrachtElement = () => {
 						return (
 							<Rapport
 								key={index}
+								metSluitIcon
+								studentId={rapport.student._id}
+								closeAction={updateOpdrachten}
 								studentNaam={rapport.student.voorNaam + ' ' + rapport.student.familieNaam}
 								status={rapport.status}
-								extraTijd={rapport.extraMinuten}
+								extraTijd={rapport.extraTijd}
 								vragen={rapport.vragen}
 							/>
 						);

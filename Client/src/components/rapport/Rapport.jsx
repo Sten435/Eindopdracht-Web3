@@ -1,18 +1,42 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
 import style from './rapport.module.css';
+import Fetch from '../../controller/fetch';
+import { socket } from '../../controller/socket';
 
 const Rapport = (rapport) => {
-	const { studentNaam, status, extraTijd, vragen, vraagHulp } = rapport;
+	const { id: opdrachtId } = useParams();
 
-	const randomSeed = (Math.random() + 1).toString(36).substring(7);
 	const randomRotation = Math.floor(Math.random() * (360 - 320 + 1)) + 0;
+	const [image] = useState(`https://avatars.dicebear.com/api/avataaars/${rapport.studentNaam}.svg?options[mood][]=happy&options[rotation]=${randomRotation}`);
+
+	const { studentId, studentNaam, status, extraTijd, vragen, closeAction, metSluitIcon = null } = rapport;
+
 	let statusColor = status === 'bezig' ? 'bg-orange-400' : '';
 	statusColor = status === 'ik doe niet mee' ? 'bg-blue-400' : statusColor;
 	statusColor = status === 'ik geef op' ? 'bg-red-400' : statusColor;
 	statusColor = status === 'ik ben klaar' ? 'bg-green-400' : statusColor;
 
+	const removeRapport = async () => {
+		const result = await Fetch(`rapporten/${opdrachtId}/${studentId}`, 'DELETE');
+		if (result.error) alert(result.message);
+
+		closeAction();
+
+		socket.emit('toClient', { opdrachtId, userId: studentId, action: 'removeRapport' });
+	};
+
 	return (
-		<>
+		<div className='relative'>
+			{metSluitIcon && (
+				<div
+					className='absolute -top-1 -right-2 p-1 bg-red-500 rounded-full text-white hover:scale-125 cursor-pointer'
+					onClick={removeRapport}>
+					<FaTimes />
+				</div>
+			)}
 			<div className={style.rapportContainer}>
 				<div>
 					<div className='mb-4'>
@@ -46,12 +70,12 @@ const Rapport = (rapport) => {
 					<span className='underline'>{studentNaam.toUpperCase()}</span>
 					<img
 						className={style.img}
-						src={`https://avatars.dicebear.com/api/miniavs/${randomSeed}.svg?&scale=88&rotate=${randomRotation}&translateX=3`}
+						src={image}
 						alt='face'
 					/>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 };
 

@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Fetch from './fetch';
 import axios from 'axios';
-import { WEBSOCKET_API_URL } from '../config.js';
-import { io as socketIo } from 'socket.io-client';
 
 const LoadPage = (url = '', method = '', withAuth = true) => {
 	const [response, setResponse] = useState(null);
@@ -13,17 +11,6 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 
 	const navigate = useNavigate();
 	const location = useLocation();
-
-	let io;
-
-	// useEffect(() => {
-	io = new socketIo(WEBSOCKET_API_URL, {
-		query: {
-			roomName: 'client',
-		},
-		withCredentials: true,
-	});
-	// }, [])
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -35,14 +22,14 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 						const data = await Fetch('/auth', 'GET');
 						if (!data.loggedIn) {
 							if (location.pathname === '/') return;
-							return navigate('/logout', { replace: true });
+							return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
 						} else {
 							if (location.pathname === '/') return navigate('/student/dashboard');
 							else if (!user) setUser({ ...data.user });
 						}
 					} catch (error) {
 						console.log(`authenticate: ${error}`);
-						return navigate('/logout', { replace: true });
+						return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
 					}
 				}
 
@@ -55,7 +42,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 				const data = await Fetch(url, method);
 				setResponse(data);
 			} catch (error) {
-				console.log(`fetchData: ${error.message ?? error}`);
+				console.log(`error: ${error.message ?? error}`);
 				setError(error);
 			} finally {
 				setLoading(false);
@@ -64,7 +51,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		fetchData();
 	}, [url, navigate, withAuth, method, location.pathname, user]);
 
-	return { response, error, loading, user, socket: io };
+	return { response, setResponse, error, loading, user };
 };
 
 export default LoadPage;

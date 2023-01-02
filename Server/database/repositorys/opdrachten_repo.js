@@ -37,7 +37,7 @@ export const startOpdrachtInDB = async (opdrachtId) => {
 	const database = client.db('web3');
 	const opdrachten = database.collection('opdrachten');
 
-	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { startDatum: new Date().toISOString() } });
+	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { startDatum: Date.now() } });
 
 	return result;
 };
@@ -53,7 +53,7 @@ export const wijzigExtraTijdVragenInDB = async (opdrachtId, newValueExtraTijd) =
 	return result;
 };
 
-export const voegExtraTijdToeInDB = async (opdrachtId, gemiddeldeExtraMinuten) => {
+export const voegExtraTijdToeInDB = async (opdrachtId, gemiddeldeextraTijd) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);
 	const database = client.db('web3');
@@ -61,10 +61,7 @@ export const voegExtraTijdToeInDB = async (opdrachtId, gemiddeldeExtraMinuten) =
 
 	const opdracht = await opdrachten.findOne({ _id: ObjectId(opdrachtId) });
 
-	console.log(opdracht.seconden);
-	console.log(gemiddeldeExtraMinuten);
-
-	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { seconden: gemiddeldeExtraMinuten * 60 + opdracht.seconden } });
+	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { seconden: gemiddeldeextraTijd * 60 + opdracht.seconden } });
 
 	return result;
 };

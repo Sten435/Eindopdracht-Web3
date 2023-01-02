@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijdInMinuten } from '../controllers/opdrachten_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
@@ -82,7 +82,7 @@ router.get('/extraTijd/:opdrachtId', async (req, res) => {
 		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
 		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 
-		const seconden = await getGemiddeldeExtraTijdInMinuten(opdrachtId);
+		const seconden = await getGemiddeldeExtraTijd(opdrachtId);
 
 		return res.json({ message: 'success', error: false, loggedIn: true, result: { seconden } });
 	} catch (error) {

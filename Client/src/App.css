@@ -96,6 +96,16 @@ a:hover {
 	cursor: pointer;
 }
 
+.Toastify__toast {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: fit-content;
+}
+
+.Toastify__toast-body {
+	margin-right: 0.4rem;
+}
+
 .terugContainer {
 	display: flex;
 	align-items: center;

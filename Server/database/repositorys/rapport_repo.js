@@ -5,7 +5,7 @@ export const insertRapportInDB = async (studentId, opdrachtId) => {
 	const client = new MongoClient(uri);
 
 	try {
-		const rapport = { studentId: ObjectId(studentId), opdrachtId: ObjectId(opdrachtId), status: 'bezig', extraMinuten: null, verwijderd: false, aanmaakDatum: new Date().toISOString() };
+		const rapport = { studentId: ObjectId(studentId), opdrachtId: ObjectId(opdrachtId), status: 'bezig', extraTijd: null, verwijderd: false, aanmaakDatum: new Date().toISOString() };
 
 		const database = client.db('web3');
 		const rapporten = database.collection('rapporten');
@@ -27,6 +27,22 @@ export const getRapportFromDb = async (studentId, opdrachtId) => {
 		const rapporten = database.collection('rapporten');
 
 		const result = await rapporten.findOne({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] });
+
+		return result;
+	} finally {
+		await client.close();
+	}
+};
+
+export const deleteRapportFromDB = async (studentId, opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+
+	try {
+		const database = client.db('web3');
+		const rapporten = database.collection('rapporten');
+
+		const result = await rapporten.deleteOne({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] });
 
 		return result;
 	} finally {
@@ -109,7 +125,7 @@ export const wijzigRapportInDB = async (studentId, opdrachtId, actie, actieNaam)
 
 		let result;
 		if (actieNaam === 'extraTijd') {
-			result = await rapporten.updateOne({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] }, { $set: { extraMinuten: actie } });
+			result = await rapporten.updateOne({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] }, { $set: { extraTijd: actie } });
 		} else result = await rapporten.updateOne({ $and: [{ studentId: ObjectId(studentId) }, { opdrachtId: ObjectId(opdrachtId) }] }, { $set: { status: actie } });
 
 		return result.insertedId;

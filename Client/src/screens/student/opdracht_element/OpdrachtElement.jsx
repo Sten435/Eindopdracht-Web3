@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaClock, FaClosedCaptioning } from 'react-icons/fa';
-import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
+import { FaClock } from 'react-icons/fa';
 import { BulletLijst, Button, Header, InputText, Section } from '../../../components/index.js';
+import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
 import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
+import { socket } from '../../../controller/socket.js';
 import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
@@ -12,6 +13,7 @@ const OpdrachtElement = () => {
 	const [selectedButton, setSelectedButton] = useState();
 	const [selectedRadioButton, setSelectedRadioButton] = useState();
 	const [bestaatRapport, setBestaatRapport] = useState(false);
+	const [tijd, setTijd] = useState();
 	const [kanStudentExtraTijdVragen, setKanStudentExtraTijdVragen] = useState(true);
 
 	const { id: opdrachtId } = useParams();
@@ -23,7 +25,7 @@ const OpdrachtElement = () => {
 	const bezigStatusRef = useRef();
 
 	const result = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
-	const { response, loading, error, user, socket } = result;
+	const { response, loading, error, user } = result;
 
 	const getRapportInfo = async () => {
 		const result = await Fetch(`/rapporten/${user._id}/${opdrachtId}`, 'GET');
@@ -42,11 +44,11 @@ const OpdrachtElement = () => {
 		setBestaatRapport(true);
 		setSelectedRadioButton(rapport.status);
 
-		if (rapport.extraMinuten === 1) {
+		if (rapport.extraTijd === 1) {
 			setSelectedButton({ een: true, vijf: false, tien: false });
-		} else if (rapport.extraMinuten === 5) {
+		} else if (rapport.extraTijd === 5) {
 			setSelectedButton({ een: false, vijf: true, tien: false });
-		} else if (rapport.extraMinuten === 10) {
+		} else if (rapport.extraTijd === 10) {
 			setSelectedButton({ een: false, vijf: false, tien: true });
 		}
 	};
@@ -60,23 +62,11 @@ const OpdrachtElement = () => {
 	const getOpdrachtData = async () => {
 		const result = await Fetch('/opdrachten/status', 'POST', { opdrachtId });
 		if (result.error) return alert(result.message);
-		if (result.status !== 'Lopend') return navigate('/student/dashboard');
+		if (result.status !== 'Lopend') return navigate('/student/dashboard', { reden: `rapport is niet beschikbaar (status: ${result.status})` });
 
 		getRapportInfo();
 		getVragenVanRapport();
 	};
-
-	useEffect(() => {
-		if (!user) return;
-		getOpdrachtData();
-		if (!response) return;
-		setKanStudentExtraTijdVragen(response.opdracht.kanStudentExtraTijdVragen);
-	}, [user, response]);
-
-	if (error) return <p>Er is iets fout gegaan</p>;
-	if (loading || selectedRadioButton === undefined) return <p>Loading...</p>;
-
-	const { naam, beschrijving, seconden: timeLeft, kanStudentExtraTijdVragen: extraTijdVragen } = response.opdracht;
 
 	const addVraag = async () => {
 		const nieuweVraag = vraagRef.current.value;
@@ -90,6 +80,7 @@ const OpdrachtElement = () => {
 			const result = await Fetch('/rapporten/vraag', 'POST', { studentId: user._id, opdrachtId, vraag: nieuweVraag });
 			if (result.error) return alert(result.message);
 			setVraag([...vragen, nieuweVraag]);
+			socket.emit('toClient', { opdrachtId, action: 'addVraag' });
 		}
 
 		vragenFormRef.current.reset();
@@ -103,6 +94,7 @@ const OpdrachtElement = () => {
 		setSelectedRadioButton('bezig');
 		setBestaatRapport(true);
 		if (bezigStatusRef.current) bezigStatusRef.current.checked = true;
+		socket.emit('toClient', { opdrachtId, action: 'startRapport' });
 	};
 
 	const wijzigStatus = async (e) => {
@@ -115,9 +107,11 @@ const OpdrachtElement = () => {
 
 		const result = await Fetch('/rapporten/status', 'PUT', { studentId: user._id, opdrachtId, status });
 		if (result.error) return alert(result.message);
+
+		socket.emit('toClient', { opdrachtId, action: 'wijzigStatus' });
 	};
 
-	const wijzigMinuten = async (buttons) => {
+	const wijzigExtraTijd = async (buttons) => {
 		if (JSON.stringify(selectedButton) === JSON.stringify(buttons) || !buttons) return;
 		setSelectedButton(buttons);
 		const button = Object.keys(buttons).find((b) => buttons[b]);
@@ -125,12 +119,65 @@ const OpdrachtElement = () => {
 		const minutenObject = { een: 1, vijf: 5, tien: 10 };
 		const result = await Fetch('/rapporten/tijd', 'PUT', { studentId: user._id, opdrachtId, extraTijd: minutenObject[button] });
 		if (result.error) return alert(result.message);
+
+		socket.emit('toClient', { opdrachtId, action: 'wijzigExtraTijd' });
 	};
 
 	const vraagHulp = async () => {
-		if (!socket) return console.log('socket is undefined');
 		socket.emit('toClient', { opdrachtId, userId: user._id, action: 'vraagHulp' });
 	};
+
+	const voegExtraTijdToeEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		setTijd(data.nieuweTijd);
+	};
+
+	const wijzigKanStudentExtraTijdVragenEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+		if (opdrachtID !== opdrachtId) return;
+
+		const { extraTijdToegestaan } = data;
+		setKanStudentExtraTijdVragen(extraTijdToegestaan);
+	};
+
+	const stopOpdrachtEvent = (data) => {
+		navigate('/student/dashboard', { state: { reden: 'Opdracht is afgelopen' } });
+	};
+
+	const removeRapportEvent = (data) => {
+		const { opdrachtId: opdrachtID, userId } = data;
+
+		if (opdrachtID !== opdrachtId) return;
+		if (userId !== user._id) return;
+
+		navigate('/student/dashboard', { state: { reden: 'Rapport is verwijderd door host' } });
+	};
+
+	useEffect(() => {
+		if (!user) return;
+		getOpdrachtData();
+
+		if (!response) return;
+		setKanStudentExtraTijdVragen(response.opdracht.kanStudentExtraTijdVragen);
+
+		if (!tijd) setTijd(response.opdracht.seconden);
+	}, [user, response]);
+
+	useEffect(() => {
+		socket.on('voegExtraTijdToe', voegExtraTijdToeEvent);
+		socket.on('wijzigKanStudentExtraTijdVragen', wijzigKanStudentExtraTijdVragenEvent);
+		socket.on('stopOpdracht', stopOpdrachtEvent);
+		socket.on('removeRapport', removeRapportEvent);
+
+		return () => socket.off();
+	}, [response]);
+
+	if (error) return <p>Er is iets fout gegaan</p>;
+	if (loading || selectedRadioButton === undefined) return <p>Loading...</p>;
+
+	const { naam, beschrijving } = response.opdracht;
 
 	return (
 		<main className={style.main}>
@@ -140,15 +187,15 @@ const OpdrachtElement = () => {
 			/>
 			<Section noLine>
 				<div className={style.helpContainer}>
-					{timeLeft !== 0 && (
+					{tijd && tijd !== 0 && (
 						<span className='text-2xl pb-1 pl-2 pr-2 pt-1 mb-4 mr-2 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>
 							<FaClock
 								className='mr-5'
 								size={25}
 							/>
 							<CountdownTimer
-								seconden={timeLeft}
-								onEnd={() => navigate('/student/dashboard?=reden=opdracht afgelopen')}
+								seconden={tijd}
+								onEnd={() => navigate('/student/dashboard', { state: { reden: 'Opdracht is afgelopen' } })}
 							/>
 						</span>
 					)}
@@ -165,7 +212,7 @@ const OpdrachtElement = () => {
 						{bestaatRapport && (
 							<Button
 								className='mt-8 ml-5 text-2xl'
-								text='Vraag Hulp 🤘'
+								text='Vraag Hulp 👋'
 								click={vraagHulp}
 							/>
 						)}
@@ -242,19 +289,19 @@ const OpdrachtElement = () => {
 									text='+ 1 min'
 									className={'mt-5 mr-2 ' + (selectedButton?.een === true ? 'bg-green-600 text-white' : '')}
 									disabled={selectedButton?.een}
-									click={() => wijzigMinuten({ een: true, vijf: false, tien: false })}
+									click={() => wijzigExtraTijd({ een: true, vijf: false, tien: false })}
 								/>
 								<Button
 									text='+ 5 min'
 									className={'mt-5 ml-1 mr-1 ' + (selectedButton?.vijf === true ? 'bg-green-600 text-white' : '')}
 									disabled={selectedButton?.vijf}
-									click={() => wijzigMinuten({ een: false, vijf: true, tien: false })}
+									click={() => wijzigExtraTijd({ een: false, vijf: true, tien: false })}
 								/>
 								<Button
 									text='+ 10 min'
 									className={'mt-5 ml-2 ' + (selectedButton?.tien === true ? 'bg-green-600 text-white' : '')}
 									disabled={selectedButton?.tien}
-									click={() => wijzigMinuten({ een: false, vijf: false, tien: true })}
+									click={() => wijzigExtraTijd({ een: false, vijf: false, tien: true })}
 								/>
 							</div>
 						</Section>
