@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd } from '../controllers/opdrachten_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd, getOpdrachtByNaamEnBeschrijving, maakNieuweOpdracht } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
@@ -51,7 +51,7 @@ router.post('/wijzigExtraTijdVragen', async (req, res) => {
 
 		await wijzigExtraTijdVragen(opdrachtId, !bestaatOpdrachtId.opdracht.kanStudentExtraTijdVragen);
 
-		return res.json({ message: 'success', error: false, loggedIn: true, status: bestaatOpdrachtId.opdracht.status });
+		return res.json({ message: 'success', error: false, loggedIn: true });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
 	}
@@ -87,6 +87,25 @@ router.get('/extraTijd/:opdrachtId', async (req, res) => {
 		return res.json({ message: 'success', error: false, loggedIn: true, result: { seconden } });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
+	}
+});
+
+router.post('/maak', async (req, res) => {
+	try {
+		const { naam, beschrijving, seconden } = req.body;
+		if (!naam) return res.json({ message: 'naam is niet geldig', error: true, loggedIn: true });
+		if (!beschrijving) return res.json({ message: 'beschrijving is niet geldig', error: true, loggedIn: true });
+		if (!seconden || seconden <= 0) return res.json({ message: 'seconden is niet geldig', error: true, loggedIn: true });
+
+		const bestaatOpdrachtNaam = await getOpdrachtByNaamEnBeschrijving(naam, beschrijving);
+		if (bestaatOpdrachtNaam.found) return res.json({ message: 'opdracht bestaat al', error: true, loggedIn: true });
+
+		await maakNieuweOpdracht(naam, beschrijving, seconden);
+
+		return res.json({ message: 'success', error: false, loggedIn: true });
+	} catch (error) {
+		console.log(error);
+		return res.json({ message: error.message, error: true, loggedIn: true });
 	}
 });
 

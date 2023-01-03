@@ -13,15 +13,25 @@ import { useLocation } from 'react-router-dom';
 const Dashboard = () => {
 	const location = useLocation();
 	const [opdrachten, setOpdrachten] = useState();
-	const { response, loading, error } = LoadPage('/opdrachten', 'GET');
+	const { response, loading, error, user } = LoadPage('/opdrachten', 'GET');
 
 	const updateOpdrachteEvent = async (data) => {
 		const result = await Fetch('/opdrachten', 'GET');
 		setOpdrachten(result.opdrachten);
 	};
 
+	const checkAlerts = () => {
+		if (!location) return;
+		const alertId = location.key;
+
+		if (alertId === sessionStorage.getItem('alertId')) return;
+		else sessionStorage.setItem('alertId', alertId);
+
+		if (location.state?.reden) toast.info(location.state?.reden);
+	};
+
 	useEffect(() => {
-		if (location && location.state?.reden) toast.info(location.state?.reden);
+		checkAlerts();
 	}, []);
 
 	useEffect(() => {
@@ -46,8 +56,8 @@ const Dashboard = () => {
 	return (
 		<main className={style.main}>
 			<Header
-				title='Student Dashboard'
-				name='student stan'
+				title='Student'
+				name={user.voorNaam + ' ' + user.familieNaam}
 				metTerugButton={false}
 			/>
 			{!opdrachten && <h1 className='text-4xl text-center mt-5 font-bold'>Er zijn geen opdrachten</h1>}

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getOpdrachtById } from '../controllers/opdrachten_controller.js';
-import { getStudentById } from '../controllers/user_controller.js';
+import { getStudentById } from '../controllers/studenten_controller.js';
 import { insertRapport, getRapportByStudentIdAndOpdrachtId, wijzigRapport, getRapport, getRapportenByOpdrachtId, insertVraag, getVragenByStudentAndOpdrachtId, deleteRapport } from '../controllers/rapport_controller.js';
 
 const router = Router();

@@ -35,11 +35,10 @@ const Card = (result) => {
 			style={{ textDecoration: 'none', width: '100%' }}>
 			<div className={style.card}>
 				<div>
-					<h2>{naam}</h2>
 					<p style={{ marginBottom: '20px' }}>{beschrijving}</p>
 					<span>
 						{!isLopend && !isBeeindigd && startDatum && !gestoptDoorHost && 'Resterend:'}
-						<b className='bg-cyan-500 text-white p-1 ml-2 rounded-md'>{countDownTimer}</b>
+						<b className='bg-indigo-400 text-white p-2 ml-0 rounded-md'>{countDownTimer}</b>
 					</span>
 				</div>
 				{status && <span className={style.statusContainer + ' ' + style[status]}>{status}</span>}

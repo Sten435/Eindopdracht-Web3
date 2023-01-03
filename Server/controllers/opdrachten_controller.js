@@ -1,4 +1,4 @@
-import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, stopOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB } from '../database/repositorys/opdrachten_repo.js';
+import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, stopOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB, getOpdrachtByNaamEnBeschrijvingFromDB, maakNieuweOpdrachtInDB } from '../database/repositorys/opdrachten_repo.js';
 import { getRapportenByOpdrachtId } from '../controllers/rapport_controller.js';
 
 export const getOpdrachten = async () => {
@@ -40,27 +40,27 @@ export const getOpdrachten = async () => {
 };
 
 export const getOpdrachtById = async (opdrachtId) => {
-	let extraSeconds;
+	let result;
 	try {
-		extraSeconds = await getOpdrachtByIdFromDB(opdrachtId);
+		result = await getOpdrachtByIdFromDB(opdrachtId);
 	} catch (error) {
 		return { found: false };
 	}
 
-	if (!extraSeconds) return { found: false };
-	if (extraSeconds.length === 0) return { found: false };
+	if (!result) return { found: false };
+	if (result.length === 0) return { found: false };
 
-	let timeLeft = extraSeconds[0].seconden;
-	if (extraSeconds[0].startDatum) {
-		const startDate = new Date(extraSeconds[0].startDatum);
+	let timeLeft = result[0].seconden;
+	if (result[0].startDatum) {
+		const startDate = new Date(result[0].startDatum);
 		const newDate = new Date(startDate);
-		newDate.setSeconds(startDate.getSeconds() + extraSeconds[0].seconden);
+		newDate.setSeconds(startDate.getSeconds() + result[0].seconden);
 
 		timeLeft = Math.round((newDate - Date.now()) / 1000);
 	}
 
 	let status = 'Niet Gestart';
-	if (extraSeconds[0].startDatum && timeLeft >= 0) {
+	if (result[0].startDatum && timeLeft >= 0) {
 		status = 'Lopend';
 	}
 
@@ -68,17 +68,72 @@ export const getOpdrachtById = async (opdrachtId) => {
 		status = 'Afgelopen';
 	}
 
-	if (extraSeconds[0].gestoptDoorHost) {
+	if (result[0].gestoptDoorHost) {
 		status = 'Beeindigd';
 	}
 
 	let opdracht = {
-		...extraSeconds[0],
+		...result[0],
 		seconden: timeLeft >= 0 ? timeLeft : null,
 		status,
 	};
 
 	return { found: true, opdracht: opdracht };
+};
+
+export const getOpdrachtByNaamEnBeschrijving = async (naam, beschrijving) => {
+	let result;
+	try {
+		result = await getOpdrachtByNaamEnBeschrijvingFromDB(naam, beschrijving);
+	} catch (error) {
+		return { found: false };
+	}
+
+	if (!result) return { found: false };
+	if (result.length === 0) return { found: false };
+
+	let timeLeft = result[0].seconden;
+	if (result[0].startDatum) {
+		const startDate = new Date(result[0].startDatum);
+		const newDate = new Date(startDate);
+		newDate.setSeconds(startDate.getSeconds() + result[0].seconden);
+
+		timeLeft = Math.round((newDate - Date.now()) / 1000);
+	}
+
+	let status = 'Niet Gestart';
+	if (result[0].startDatum && timeLeft >= 0) {
+		status = 'Lopend';
+	}
+
+	if (timeLeft < 0) {
+		status = 'Afgelopen';
+	}
+
+	if (result[0].gestoptDoorHost) {
+		status = 'Beeindigd';
+	}
+
+	let opdracht = {
+		...result[0],
+		seconden: timeLeft >= 0 ? timeLeft : null,
+		status,
+	};
+
+	return { found: true, opdracht: opdracht };
+};
+
+export const maakNieuweOpdracht = async (naam, beschrijving, seconden) => {
+	const opdracht = {
+		naam: naam,
+		beschrijving: beschrijving,
+		seconden: seconden,
+		verwijderd: false,
+		startDatum: null,
+		kanStudentExtraTijdVragen: true,
+		gestoptDoorHost: false,
+	};
+	return await maakNieuweOpdrachtInDB(opdracht);
 };
 
 export const getGemiddeldeExtraTijd = async (opdrachtId) => {

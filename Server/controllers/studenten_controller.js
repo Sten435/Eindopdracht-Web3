@@ -32,7 +32,7 @@ export const getStudentById = async (studentId) => {
 
 	if (!user) return { found: false };
 	if (user.length === 0) return { found: false };
-	return { found: true, user };
+	return { found: true, user: user[0] };
 };
 
 export const encryptCode = (code) => {

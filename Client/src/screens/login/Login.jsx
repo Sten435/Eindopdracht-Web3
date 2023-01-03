@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, InputText } from '../../components';
 import style from './login.module.css';
 import axios from 'axios';
 import LoadPage from '../../controller/loadPage';
+import Button from '../../components/button/Button';
+import InputText from '../../components/inputText/InputText';
 
 const Login = () => {
 	const emailRef = useRef();
@@ -32,19 +33,33 @@ const Login = () => {
 			<h1>202182629</h1>
 			<div className={style.formContainer}>
 				<div className={style.emailContainer}>
-					<label className={style.label} htmlFor="email">
+					<label
+						className={style.label}
+						htmlFor='email'>
 						Email:
 					</label>
-					<InputText referace={emailRef} placeholder="Enter your email" />
+					<InputText
+						referace={emailRef}
+						placeholder='Enter your email'
+					/>
 				</div>
 				<div className={style.pincodeContainer}>
-					<label className={style.label} htmlFor="pincode">
+					<label
+						className={style.label}
+						htmlFor='pincode'>
 						Pincode:
 					</label>
-					<InputText referace={codeRef} placeholder="Enter your pincode" />
+					<InputText
+						referace={codeRef}
+						placeholder='Enter your pincode'
+					/>
 				</div>
 				<div className={style.loginContainer}>
-					<Button click={() => loginRequest()} text="Login" style={{ padding: '.4rem 1.4rem', fontSize: '1.6rem', marginTop: '1.4rem' }} />
+					<Button
+						click={() => loginRequest()}
+						text='Login'
+						style={{ padding: '.4rem 1.4rem', fontSize: '1.6rem', marginTop: '1.4rem' }}
+					/>
 				</div>
 			</div>
 		</main>

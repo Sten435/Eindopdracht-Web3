@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createToken } from '../controllers/token_controller.js';
-import { doesUserExist } from '../controllers/user_controller.js';
+import { doesUserExist } from '../controllers/studenten_controller.js';
 const router = Router();
 
 router.post('/', async (req, res) => {

@@ -1,13 +1,48 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import GaTerug from '../gaTerug/GaTerug';
 
 const Header = ({ title, name, metTerugButton = true, metLogoutButton = true }) => {
+	const navigate = useNavigate();
+	const location = useLocation();
 	return (
-		<header className="header p-3 mb-8 sticky top-0">
-			{metTerugButton && <GaTerug backgroundKleur="#1d7cb6" text="Ga Terug" />}
-			<h1 className="text-3xl font-bold">{title}</h1>
-			<b className="text-3xl font-bold">{name}</b>
-			{metLogoutButton && <GaTerug text="Logout" to="/logout" />}
+		<header className='sticky top-0 z-10 w-full drop-shadow-md'>
+			<nav className='flex flex-wrap items-center justify-between p-4 bg-white'>
+				<div className='w-auto order-2 lg:text-center block'>
+					<h1 className='text-xl font-semibold text-gray-800 font-heading'>
+						<span
+							className='underline underline-offset-2 cursor-pointer'
+							onClick={() => {
+								if (location.pathname.includes('student')) {
+									return navigate('/host');
+								} else if (location.pathname.includes('host')) {
+									return navigate('/admin');
+								}
+
+								navigate('/student');
+							}}>
+							{title && title.toUpperCase()}
+						</span>
+						{name && <span> - {name.toUpperCase()}</span>}
+					</h1>
+				</div>
+				<div className='w-fit navbar-menu lg:order-1 lg:block lg:w-2/5'>
+					<div className='block lg:inline-block lg:mt-0'>
+						{metTerugButton && (
+							<GaTerug
+								backgroundKleur='#374151'
+								text='Ga Terug'
+							/>
+						)}
+						{metLogoutButton && !metTerugButton && (
+							<GaTerug
+								text='Logout'
+								to='/logout'
+							/>
+						)}
+					</div>
+				</div>
+			</nav>
 		</header>
 	);
 };

@@ -1,8 +1,12 @@
-import { useRef, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { FaClock } from 'react-icons/fa';
-import { BulletLijst, Button, Header, InputText, Section } from '../../../components/index.js';
+import { useNavigate, useParams } from 'react-router-dom';
+import BulletLijst from '../../../components/bulletLijst/BulletLijst.jsx';
+import Button from '../../../components/button/Button.jsx';
 import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
+import Header from '../../../components/header/Header.jsx';
+import InputText from '../../../components/inputText/InputText.jsx';
+import Section from '../../../components/section/Section.jsx';
 import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
@@ -24,8 +28,7 @@ const OpdrachtElement = () => {
 	const statusFormRef = useRef();
 	const bezigStatusRef = useRef();
 
-	const result = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
-	const { response, loading, error, user } = result;
+	const { response, loading, error, user } = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
 
 	const getRapportInfo = async () => {
 		const result = await Fetch(`/rapporten/${user._id}/${opdrachtId}`, 'GET');
@@ -62,7 +65,7 @@ const OpdrachtElement = () => {
 	const getOpdrachtData = async () => {
 		const result = await Fetch('/opdrachten/status', 'POST', { opdrachtId });
 		if (result.error) return alert(result.message);
-		if (result.status !== 'Lopend') return navigate('/student/dashboard', { reden: `rapport is niet beschikbaar (status: ${result.status})` });
+		if (result.status !== 'Lopend') return navigate('/student/dashboard', { replace: true, reden: `rapport is niet beschikbaar (status: ${result.status})` });
 
 		getRapportInfo();
 		getVragenVanRapport();
@@ -142,8 +145,8 @@ const OpdrachtElement = () => {
 		setKanStudentExtraTijdVragen(extraTijdToegestaan);
 	};
 
-	const stopOpdrachtEvent = (data) => {
-		navigate('/student/dashboard', { state: { reden: 'Opdracht is afgelopen' } });
+	const stopOpdrachtEvent = () => {
+		navigate('/student/dashboard', { replace: true, state: { reden: 'Opdracht is afgelopen' } });
 	};
 
 	const removeRapportEvent = (data) => {
@@ -152,7 +155,7 @@ const OpdrachtElement = () => {
 		if (opdrachtID !== opdrachtId) return;
 		if (userId !== user._id) return;
 
-		navigate('/student/dashboard', { state: { reden: 'Rapport is verwijderd door host' } });
+		navigate('/student/dashboard', { replace: true, state: { reden: 'Rapport is verwijderd door host' } });
 	};
 
 	useEffect(() => {
@@ -182,20 +185,20 @@ const OpdrachtElement = () => {
 	return (
 		<main className={style.main}>
 			<Header
-				title='Student Dashboard'
-				name='student stan'
+				title='Student'
+				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<Section noLine>
 				<div className={style.helpContainer}>
 					{tijd && tijd !== 0 && (
-						<span className='text-2xl pb-1 pl-2 pr-2 pt-1 mb-4 mr-2 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>
+						<span className='text-2xl pb-1 pl-2 pr-2 pt-1 mb-4 mr-2 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>
 							<FaClock
 								className='mr-5'
 								size={25}
 							/>
 							<CountdownTimer
 								seconden={tijd}
-								onEnd={() => navigate('/student/dashboard', { state: { reden: 'Opdracht is afgelopen' } })}
+								onEnd={() => navigate('/student/dashboard', { replace: true, state: { reden: 'Opdracht is afgelopen' } })}
 							/>
 						</span>
 					)}

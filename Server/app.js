@@ -14,6 +14,7 @@ import homeRoute from './routes/index.js';
 import loginRoute from './routes/login.js';
 import logoutRoute from './routes/logout.js';
 import opdrachtenRoute from './routes/opdrachten.js';
+import studentenRoute from './routes/studenten.js';
 import rapportenRoute from './routes/rapporten.js';
 import importFileRoute from './routes/csv.js';
 import authRoute from './routes/auth.js';
@@ -47,6 +48,7 @@ app.use('/logout', logoutRoute);
 app.use('/import', importFileRoute);
 app.use('/auth', authRoute);
 app.use('/opdrachten', opdrachtenRoute);
+app.use('/studenten', studentenRoute);
 app.use('/rapporten', rapportenRoute);
 
 io.on('connection', (socket) => {

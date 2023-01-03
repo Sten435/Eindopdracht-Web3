@@ -1,5 +1,5 @@
 import { insertOpdrachtInDb, insertStudentenInDb } from '../database/repositorys/csv_repo.js';
-import { encryptCode } from './user_controller.js';
+import { encryptCode } from './studenten_controller.js';
 
 export const insertOpdracht = async (opdrachten) => {
 	opdrachten = opdrachten

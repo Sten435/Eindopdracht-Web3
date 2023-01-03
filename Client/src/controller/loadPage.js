@@ -12,6 +12,11 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
+	const updateOpdrachten = async (opdrachtId) => {
+		const result = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
+		setResponse(result);
+	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -51,7 +56,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		fetchData();
 	}, [url, navigate, withAuth, method, location.pathname, user]);
 
-	return { response, setResponse, error, loading, user };
+	return { response, setResponse, updateOpdrachten, error, loading, user };
 };
 
 export default LoadPage;

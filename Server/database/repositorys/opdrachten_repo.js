@@ -31,6 +31,32 @@ export const getOpdrachtByIdFromDB = async (opdrachtId) => {
 	return data;
 };
 
+export const getOpdrachtByNaamEnBeschrijvingFromDB = async (naam, beschrijving) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const data = await opdrachten.find({ $and: [{ naam: naam }, { beschrijving: beschrijving }] }).toArray();
+
+	return data;
+};
+
+export const maakNieuweOpdrachtInDB = async (opdracht) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+
+	try {
+		const database = client.db('web3');
+		const students = database.collection('opdrachten');
+
+		const result = await students.insertOne(opdracht);
+		return result;
+	} finally {
+		await client.close();
+	}
+};
+
 export const startOpdrachtInDB = async (opdrachtId) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

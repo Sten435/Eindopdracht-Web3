@@ -1,6 +1,5 @@
 import { FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
-import { Button, Header, Section } from '../../../components/index.js';
 import Rapport from '../../../components/rapport/Rapport.jsx';
 import style from './opdrachtElement.module.css';
 import LoadPage from '../../../controller/loadPage.js';
@@ -12,6 +11,9 @@ import { useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { socket } from '../../../controller/socket.js';
 import 'react-toastify/dist/ReactToastify.css';
+import Button from '../../../components/button/Button.jsx';
+import Header from '../../../components/header/Header.jsx';
+import Section from '../../../components/section/Section.jsx';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
@@ -74,14 +76,14 @@ const OpdrachtElement = () => {
 		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'voegExtraTijdToe' });
 	};
 
-	const vraagHulpEvent = (data) => {
-		const { opdrachtId: opdrachtID } = data;
+	const vraagHulpEvent = async (data) => {
+		const { opdrachtId: opdrachtID, userId } = data;
 		if (opdrachtID !== opdrachtId) return;
 
-		const students = response.rapporten.filter(({ student }) => student._id === user._id).map((student) => student.student);
-		if (students.length === 0) return;
+		const result = await Fetch(`/studenten/${userId}`, 'GET');
+		if (result.error) return alert(result.message);
 
-		const student = students[0];
+		const { student } = result;
 
 		toast.warn(
 			<span className='flex justify-center'>
@@ -186,7 +188,7 @@ const OpdrachtElement = () => {
 	let countDownTimer;
 	if (isOpdrachtGestart && !isOpdrachtBeeindigd && timerTijd) {
 		countDownTimer = (
-			<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>
+			<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>
 				<CountdownTimer
 					seconden={timerTijd}
 					onEnd={() => {
@@ -197,9 +199,9 @@ const OpdrachtElement = () => {
 			</div>
 		);
 	} else if (isOpdrachtBeeindigd) {
-		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>Opdracht is beeindigd</div>;
+		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>Opdracht is beeindigd</div>;
 	} else if (isTijdAfgelopen || !timerTijd) {
-		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-cyan-500 font-bold underline rounded-md'>Tijd is afgelopen</div>;
+		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>Tijd is afgelopen</div>;
 	}
 
 	let extraTijdButton;
@@ -213,7 +215,7 @@ const OpdrachtElement = () => {
 		<main className={style.main}>
 			<Header
 				title='Host Dashboard'
-				name='host stan'
+				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<div className='flex justify-center items-center flex-col'>
 				<div className='flex w-80 justify-between'>
@@ -265,7 +267,7 @@ const OpdrachtElement = () => {
 					})
 				) : (
 					<div className='flex justify-center'>
-						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-blue-500 font-bold rounded-md'>Er zijn nog geen rapporten</h1>
+						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-indigo-600 font-bold rounded-md'>Er zijn nog geen rapporten</h1>
 					</div>
 				)}
 			</Section>
