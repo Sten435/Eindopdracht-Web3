@@ -49,8 +49,10 @@ const Opdracht = () => {
 
 	useEffect(() => {
 		if (!response) return;
-		const naam = Object.keys(response.opdrachten)[0];
-		setGeselecteerdeOpdrachtNaam(naam);
+		if (!geselecteerdeOpdrachtNaam) {
+			const naam = Object.keys(response.opdrachten)[0];
+			setGeselecteerdeOpdrachtNaam(naam);
+		}
 	}, [response]);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
@@ -59,7 +61,6 @@ const Opdracht = () => {
 	if (!geselecteerdeOpdrachtNaam) return <p>Loading... geselecteerdeOpdrachtNaam</p>;
 
 	const { opdrachten } = response;
-	const eersteOpdracht = Object.keys(opdrachten)[0];
 
 	return (
 		opdrachten &&
@@ -112,14 +113,14 @@ const Opdracht = () => {
 							<thead>
 								<tr className='bg-gray-100'>
 									<th className='px-4 py-2 text-left font-medium text-gray-900'>Beschrijving</th>
-									<th className='px-4 py-2 text-left font-medium text-gray-900'>Startdatum</th>
-									<th className='px-4 py-2 text-left font-medium text-gray-900'>ExtraTijd</th>
-									<th className='px-4 py-2 text-left font-medium text-gray-900'>Status</th>
-									<th className='px-4 py-2 text-left font-medium text-gray-900'>Gestopt</th>
+									<th className='px-4 py-2 text-center font-medium text-gray-900'>Startdatum</th>
+									<th className='px-4 py-2 text-center font-medium text-gray-900'>ExtraTijd</th>
+									<th className='px-4 py-2 text-center font-medium text-gray-900'>Status</th>
+									<th className='px-4 py-2 text-center font-medium text-gray-900'>Gestopt</th>
 								</tr>
 							</thead>
 							<tbody>
-								{opdrachten[geselecteerdeOpdrachtNaam ?? eersteOpdracht].map((opdracht, index) => {
+								{opdrachten[geselecteerdeOpdrachtNaam].map((opdracht, index) => {
 									return (
 										<tr
 											key={index}
