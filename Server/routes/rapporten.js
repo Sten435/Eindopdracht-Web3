@@ -115,9 +115,9 @@ router.get('/:studentId/:opdrachtId', async (req, res) => {
 		const bestaatRapport = await getRapportByStudentIdAndOpdrachtId(studentId, opdrachtId);
 		if (!bestaatRapport.found) return res.json({ message: 'Rapport bestaat niet', error: true, loggedIn: true });
 
-		const { status, verwijderd, extraTijd, aanmaakDatum } = await getRapport(studentId, opdrachtId);
+		const { status, extraTijd, aanmaakDatum } = await getRapport(studentId, opdrachtId);
 
-		return res.json({ message: 'success', error: false, loggedIn: true, rapport: { status, verwijderd, extraTijd, aanmaakDatum } });
+		return res.json({ message: 'success', error: false, loggedIn: true, rapport: { status, extraTijd, aanmaakDatum } });
 	} catch (error) {
 		return res.json({ message: error.message, error: true, loggedIn: true });
 	}

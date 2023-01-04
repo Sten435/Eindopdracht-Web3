@@ -12,51 +12,64 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const updateOpdrachten = async (opdrachtId) => {
-		const result = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
-		setResponse(result);
+	const updateScreen = async () => {
+		if (!url && !method) return;
+		if (url && !method) throw new Error('Invalid method');
+		if (!url && method) throw new Error('Invalid url');
+
+		axios.defaults.withCredentials = true;
+
+		const data = await Fetch(url, method);
+		setResponse(data);
 	};
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				setLoading(true);
-				if (withAuth) {
-					try {
-						axios.defaults.withCredentials = true;
-						const data = await Fetch('/auth', 'GET');
-						if (!data.loggedIn) {
-							if (location.pathname === '/') return;
-							return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
-						} else {
-							if (location.pathname === '/') return navigate('/student/dashboard');
-							else if (!user) setUser({ ...data.user });
-						}
-					} catch (error) {
-						console.log(`authenticate: ${error}`);
-						return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
-					}
-				}
+		const controller = new AbortController();
+		fetchData(controller);
 
-				if (!url && !method) return;
-				if (url && !method) throw new Error('Invalid method');
-				if (!url && method) throw new Error('Invalid url');
-
-				axios.defaults.withCredentials = true;
-
-				const data = await Fetch(url, method);
-				setResponse(data);
-			} catch (error) {
-				console.log(`error: ${error.message ?? error}`);
-				setError(error);
-			} finally {
-				setLoading(false);
-			}
+		return () => {
+			controller.abort();
 		};
-		fetchData();
 	}, [url, navigate, withAuth, method, location.pathname, user]);
 
-	return { response, setResponse, updateOpdrachten, error, loading, user };
+	const fetchData = async (controller) => {
+		try {
+			setLoading(true);
+			if (withAuth) {
+				try {
+					axios.defaults.withCredentials = true;
+					const data = await Fetch('/auth', 'GET', { signal: controller.signal });
+					if (!data.loggedIn) {
+						if (location.pathname === '/') return;
+						return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
+					} else {
+						if (location.pathname === '/') return navigate('/student/dashboard');
+						else if (!user) setUser({ ...data.user });
+					}
+				} catch (error) {
+					console.log(`authenticate: ${error}`);
+					return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
+				}
+			}
+
+			if (!url && !method) return;
+			if (url && !method) throw new Error('Invalid method');
+			if (!url && method) throw new Error('Invalid url');
+
+			axios.defaults.withCredentials = true;
+
+			const data = await Fetch(url, method);
+			if (data.error) throw Error(data.message);
+			else setResponse(data);
+		} catch (error) {
+			console.log(`error: ${error.message ?? error}`);
+			setError(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return { response, setResponse, updateScreen, error, loading, user };
 };
 
 export default LoadPage;

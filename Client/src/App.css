@@ -10,7 +10,7 @@
 body {
 	padding: 0;
 	margin: 0;
-	background-color: whitesmoke;
+	background-color: rgb(209, 209, 209);
 }
 
 main {
@@ -20,8 +20,6 @@ main {
 
 	min-height: 100vh;
 	width: 100%;
-
-	background-color: rgb(209, 209, 209);
 }
 
 hr {

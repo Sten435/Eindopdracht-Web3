@@ -25,9 +25,6 @@ const Dashboard = () => {
 				opdrachten={opdrachten}
 				type='host'
 			/>
-			<hr style={{ width: '100%' }} />
-			<Button to='/import/opdracht'>Import Opdrachten CSV</Button>
-			<Button to='/import/student'>Import Studenten CSV</Button>
 		</main>
 	);
 };

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd, getOpdrachtByNaamEnBeschrijving, maakNieuweOpdracht } from '../controllers/opdrachten_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd, getOpdrachtByNaamEnBeschrijving, maakNieuweOpdracht, verwijderdOpdracht } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
@@ -20,6 +20,22 @@ router.get('/:id', async (req, res) => {
 
 		const opdracht = await getOpdrachtById(id);
 		if (!opdracht.found) return res.json({ message: 'opdracht niet gevonden', error: true, loggedIn: true });
+
+		return res.json({ message: 'success', error: false, loggedIn: true, opdracht: opdracht.opdracht });
+	} catch (error) {
+		return res.json({ message: error.message, error: true, loggedIn: true, error: error });
+	}
+});
+
+router.delete('/:opdrachtId', async (req, res) => {
+	try {
+		const opdrachtId = req.params.opdrachtId;
+		if (!opdrachtId) return res.json({ message: 'id is niet geldig', error: true, loggedIn: true });
+
+		const opdracht = await getOpdrachtById(opdrachtId);
+		if (!opdracht.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
+
+		await verwijderdOpdracht(opdrachtId);
 
 		return res.json({ message: 'success', error: false, loggedIn: true, opdracht: opdracht.opdracht });
 	} catch (error) {

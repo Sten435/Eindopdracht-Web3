@@ -9,6 +9,7 @@ const Fetch = async (url = '', method = '', body = {}) => {
 	}
 
 	axios.defaults.withCredentials = true;
+
 	if (method === 'GET') {
 		return (await axios.get(API_URL + url, { ...body, ...{ withCredentials: true, headers: { 'Content-Type': 'application/json', Accept: 'application/json' } } })).data;
 	} else if (method === 'POST') {

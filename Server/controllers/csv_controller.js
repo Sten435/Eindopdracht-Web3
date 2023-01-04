@@ -10,7 +10,6 @@ export const insertOpdracht = async (opdrachten) => {
 				// naam: opdracht[1],
 				beschrijving: opdracht[2],
 				seconden: opdracht[3] * 60,
-				verwijderd: false,
 				startDatum: null,
 				kanStudentExtraTijdVragen: true,
 				gestoptDoorHost: false,
@@ -34,7 +33,7 @@ export const insertStudent = async (studenten) => {
 				voorNaam: student[3],
 				sorteerNaam: student[4],
 				email: student[5],
-				cursusGroep: student[9]?.split(' ')[1] ?? '',
+				cursusGroep: student[9]?.split(' ')[1] === '' ? 'Geen' : student[9]?.split(' ')[1] ?? 'Geen',
 			};
 		})
 		.filter((s) => s !== undefined) // verwijder header van csv

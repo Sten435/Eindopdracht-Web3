@@ -14,7 +14,7 @@ export const getOpdrachtenFromDB = async () => {
 		if (!dictionary[item.naam]) {
 			dictionary[item.naam] = [];
 		}
-		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden, naam: item.naam, verwijderd: item.verwijderd, startDatum: item.startDatum, kanStudentExtraTijdVragen: item.kanStudentExtraTijdVragen, gestoptDoorHost: item.gestoptDoorHost });
+		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden, naam: item.naam, startDatum: item.startDatum, kanStudentExtraTijdVragen: item.kanStudentExtraTijdVragen, gestoptDoorHost: item.gestoptDoorHost });
 	});
 
 	return dictionary;
@@ -27,6 +27,17 @@ export const getOpdrachtByIdFromDB = async (opdrachtId) => {
 	const opdrachten = database.collection('opdrachten');
 
 	const data = await opdrachten.find({ _id: ObjectId(opdrachtId) }).toArray();
+
+	return data;
+};
+
+export const verwijderdOpdrachtFromDB = async (opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const data = await opdrachten.deleteOne({ _id: ObjectId(opdrachtId) });
 
 	return data;
 };

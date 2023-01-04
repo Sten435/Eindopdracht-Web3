@@ -1,15 +1,37 @@
 import React from 'react';
-import { useState } from 'react';
 
-const InputText = ({ placeholder, maxLength, minLength, referace, numberOnly = false, value = null, className }) => {
-	const [input, setInput] = useState(value);
+const InputText = ({ placeholder, maxLength, minLength, referace, numberOnly = false, isEmail = false, className }) => {
+	if (numberOnly)
+		return (
+			<input
+				placeholder={placeholder}
+				maxLength={maxLength}
+				minLength={minLength}
+				ref={referace}
+				className={'inputText ' + className}
+				min='1'
+				max='1000'
+				type='number'
+			/>
+		);
+
+	if (isEmail)
+		return (
+			<input
+				placeholder={placeholder}
+				maxLength={maxLength}
+				minLength={minLength}
+				ref={referace}
+				className={'inputText ' + className}
+				type='email'
+			/>
+		);
+
 	return (
 		<input
 			placeholder={placeholder}
 			maxLength={maxLength}
 			minLength={minLength}
-			value={input ?? ''}
-			onChange={(e) => setInput(numberOnly ? e.target?.value.replace(/[^0-9]/g, '') : e.target?.value)}
 			ref={referace}
 			className={'inputText ' + className}
 			type='text'
