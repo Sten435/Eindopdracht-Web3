@@ -4,6 +4,7 @@ import Loading from '../loading/Loading';
 import LoadPage from '../../controller/loadPage';
 import Fetch from '../../controller/fetch';
 import Papa from 'papaparse';
+import { socket } from '../../controller/socket';
 
 const LoadCSV = ({ type }) => {
 	const { loading, error } = LoadPage();
@@ -22,6 +23,8 @@ const LoadCSV = ({ type }) => {
 			complete: async () => {
 				const data = await Fetch('/import/csv/' + type, 'POST', { file: result });
 				if (data.error) return alert(data.error);
+
+				socket.emit('toClient', { action: 'refreshData' });
 			},
 		});
 	};
@@ -31,6 +34,7 @@ const LoadCSV = ({ type }) => {
 			<main>
 				<Header
 					title='Import csv'
+					metTerugButton
 					name={'type: ' + type}
 				/>
 				<div className='flex items-center justify-center w-full'>

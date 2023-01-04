@@ -1,24 +1,15 @@
-import React from 'react';
-import Header from '../../../components/header/Header';
-import style from './dashboard.module.css';
-import LoadPage from '../../../controller/loadPage';
-import OpdrachtenLijst from '../../../components/opdrachtenLijst/OpdrachtenLijst';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { socket } from '../../../controller/socket.js';
-import Fetch from '../../../controller/fetch';
-import { toast, ToastContainer } from 'react-toastify';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+
+import Header from '../../../components/header/Header';
+import OpdrachtenLijst from '../../../components/opdrachtenLijst/OpdrachtenLijst';
+import LoadPage from '../../../controller/loadPage';
+
+import { socket } from '../../../controller/socket.js';
 
 const Dashboard = () => {
 	const location = useLocation();
-	const [opdrachten, setOpdrachten] = useState();
-	const { response, loading, error, user } = LoadPage('/opdrachten', 'GET');
-
-	const updateOpdrachteEvent = async (data) => {
-		const result = await Fetch('/opdrachten', 'GET');
-		setOpdrachten(result.opdrachten);
-	};
+	const { response, updateScreen, loading, error, user } = LoadPage('/opdrachten', 'GET');
 
 	const checkAlerts = () => {
 		if (!location) return;
@@ -27,25 +18,22 @@ const Dashboard = () => {
 		if (alertId === sessionStorage.getItem('alertId')) return;
 		else sessionStorage.setItem('alertId', alertId);
 
-		if (location.state?.reden) toast.info(location.state?.reden);
+		if (location.state?.reden) alert(location.state?.reden);
 	};
 
 	useEffect(() => {
 		checkAlerts();
-	}, []);
 
-	useEffect(() => {
-		socket.on('voegExtraTijdToe', updateOpdrachteEvent);
-		socket.on('opdrachtGestart', updateOpdrachteEvent);
+		socket.on('refreshData', updateScreen);
 
 		return () => socket.off();
-	}, [response]);
+	}, []);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
 	if (loading) return <p>Loading...</p>;
-
 	if (response.error) return alert(response.error.message);
-	if (!opdrachten) setOpdrachten(response.opdrachten);
+
+	const { opdrachten } = response;
 
 	let goedeOpdrachten = {};
 
@@ -54,21 +42,21 @@ const Dashboard = () => {
 	}
 
 	return (
-		<main className={style.main}>
+		<>
 			<Header
 				title='Student'
+				metLogoutButton
 				name={user.voorNaam + ' ' + user.familieNaam}
-				metTerugButton={false}
 			/>
-			{!opdrachten && <h1 className='text-4xl text-center mt-5 font-bold'>Er zijn geen opdrachten</h1>}
-			{goedeOpdrachten && (
+			{goedeOpdrachten && Object.keys(goedeOpdrachten).length > 0 ? (
 				<OpdrachtenLijst
 					opdrachten={goedeOpdrachten}
 					type='student'
 				/>
+			) : (
+				<h2 className='mt-10 mb-2 text-center text-gray-700 font-bold text-2xl'>Nog geen opdrachten</h2>
 			)}
-			<ToastContainer />
-		</main>
+		</>
 	);
 };
 

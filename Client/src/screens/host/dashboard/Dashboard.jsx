@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../../../components/header/Header';
-import style from './dashboard.module.css';
-import Button from '../../../components/button/Button';
-import LoadPage from '../../../controller/loadPage';
 import OpdrachtenLijst from '../../../components/opdrachtenLijst/OpdrachtenLijst';
+import LoadPage from '../../../controller/loadPage';
+import { socket } from '../../../controller/socket';
 
 const Dashboard = () => {
-	const { response, loading, error, user } = LoadPage('/opdrachten', 'GET');
+	const { response, updateScreen, loading, error, user } = LoadPage('/opdrachten', 'GET');
+
+	useEffect(() => {
+		socket.on('refreshData', () => {
+			console.log('refreshing data');
+			updateScreen();
+		});
+
+		return () => socket.off();
+	}, [response]);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
 	if (loading) return <p>Loading...</p>;
@@ -15,17 +23,21 @@ const Dashboard = () => {
 	const { opdrachten } = response;
 
 	return (
-		<main className={style.main}>
+		<>
 			<Header
 				title='Host'
+				metLogoutButton
 				name={user.voorNaam + ' ' + user.familieNaam}
-				metTerugButton={false}
 			/>
-			<OpdrachtenLijst
-				opdrachten={opdrachten}
-				type='host'
-			/>
-		</main>
+			{opdrachten && Object.keys(opdrachten).length > 0 ? (
+				<OpdrachtenLijst
+					opdrachten={opdrachten}
+					type='host'
+				/>
+			) : (
+				<h2 className='mt-10 mb-2 text-center text-gray-700 font-bold text-2xl'>Nog geen opdrachten</h2>
+			)}
+		</>
 	);
 };
 

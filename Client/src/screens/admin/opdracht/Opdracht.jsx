@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { FaCheck, FaCheckCircle, FaHashtag, FaTimesCircle, FaTrash } from 'react-icons/fa';
+import Button from '../../../components/button/Button';
 import Header from '../../../components/header/Header';
 import InputText from '../../../components/inputText/InputText';
-import Button from '../../../components/button/Button';
-import LoadPage from '../../../controller/loadPage';
-import { useRef } from 'react';
-import Fetch from '../../../controller/fetch';
-import { useState } from 'react';
-import { FaCheck, FaCheckCircle, FaHashtag, FaTimesCircle, FaTrash } from 'react-icons/fa';
-import { useEffect } from 'react';
 import Section from '../../../components/section/Section';
+import Fetch from '../../../controller/fetch';
+import LoadPage from '../../../controller/loadPage';
+import { socket } from '../../../controller/socket';
 
 const Student = () => {
 	const [geselecteerdeOpdrachtNaam, setGeselecteerdeOpdrachtNaam] = useState();
@@ -31,8 +29,9 @@ const Student = () => {
 		const result = await Fetch('opdrachten/maak', 'POST', { naam, beschrijving, seconden: minuten * 60 });
 
 		updateScreen();
+		opdrachtenGewijzigd();
 
-		return result.error;
+		return { error: result.error, message: result.message };
 	};
 
 	const removeOpdracht = async (id) => {
@@ -41,6 +40,7 @@ const Student = () => {
 		if (result.error) return alert(result.message);
 
 		updateScreen();
+		opdrachtenGewijzigd();
 	};
 
 	const wijzigExtraTijdVragen = async (id) => {
@@ -49,6 +49,7 @@ const Student = () => {
 		if (result.error) return alert(result.message);
 
 		updateScreen();
+		opdrachtenGewijzigd();
 	};
 
 	const comboBoxSelectionChanged = (e) => {
@@ -65,6 +66,37 @@ const Student = () => {
 		if (result.error) return alert(result.message);
 
 		updateScreen();
+		opdrachtenGewijzigd();
+	};
+
+	const toonMinutenFormat = (seconden) => {
+		const minuten = seconden / 60;
+
+		return minuten % 1 === 0 ? minuten : minuten.toFixed(1);
+	};
+
+	const updateOpdracht = (opdrachtId, beschrijving) => {
+		if (!opdrachtId || !beschrijving) return;
+
+		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { beschrijving });
+		if (result.error) return alert(result.message);
+
+		updateScreen();
+		opdrachtenGewijzigd();
+	};
+
+	const wijzigMinuten = (opdrachtId, minuten) => {
+		if (!opdrachtId || !minuten) return;
+
+		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { minuten: minuten });
+		if (result.error) return alert.info(result.message);
+
+		updateScreen();
+		opdrachtenGewijzigd();
+	};
+
+	const opdrachtenGewijzigd = () => {
+		socket.emit('toClient', { action: 'refreshData' });
 	};
 
 	useEffect(() => {
@@ -90,15 +122,17 @@ const Student = () => {
 		<>
 			<Header
 				title='Admin Opdracht'
+				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
-			<Section>
+			<Section noLine>
 				<div className='flex flex-col'>
 					<form
-						onSubmit={(e) => {
-							const error = maakNieuwOpdracht();
-
+						onSubmit={async (e) => {
 							e.preventDefault();
+
+							const { error, message } = await maakNieuwOpdracht();
+							if (error) alert.error(message);
 
 							if (!error) e.target.reset();
 						}}>
@@ -140,7 +174,7 @@ const Student = () => {
 									<option
 										key={index}
 										value={key}>
-										{key}
+										{key} ({opdrachten[key].length})
 									</option>
 								))}
 							</select>
@@ -172,24 +206,20 @@ const Student = () => {
 															/>
 														</td>
 														<td
-															className='px-4 py-2 max-w-prose cursor-text select-none'
-															onMouseLeave={(e) => (e.target.contentEditable = false)}
-															onClick={(e) => (e.target.contentEditable = true)}>
+															className='pr-6 pl-5 py-2 max-w-prose cursor-text select-none focus:border-dashed focus:border-orange-500 focus:outline-none focus:-z-40 focus:border-2'
+															onBlur={(e) => {
+																e.target.contentEditable = false;
+																updateOpdracht(opdracht.id, e.target.innerText);
+															}}
+															onClick={(e) => {
+																e.target.contentEditable = true;
+																e.target.focus();
+															}}>
 															{opdracht.beschrijving}
 														</td>
 														<td className='px-4 py-2 text-center'>
-															{opdracht.startDatum ? (
+															{opdracht.startDatum && !opdracht.gestoptDoorHost ? (
 																new Date(opdracht.startDatum).toLocaleString()
-															) : (
-																<FaHashtag
-																	className='inline'
-																	size={14}
-																/>
-															)}
-														</td>
-														<td className='px-4 py-2 text-center'>
-															{opdracht.seconden ? (
-																(opdracht.seconden / 60).toFixed(1)
 															) : (
 																<FaHashtag
 																	className='inline'
@@ -199,15 +229,39 @@ const Student = () => {
 														</td>
 														<td
 															className='px-4 py-2 text-center'
-															onClick={() => wijzigExtraTijdVragen(opdracht.id)}>
-															{opdracht.seconden ? (
+															onBlur={(e) => {
+																e.target.contentEditable = false;
+
+																const minuten = toonMinutenFormat(e.target.innerText * 60);
+																if (!parseFloat(minuten)) return alert.error('Geen geldige tijd');
+
+																e.target.innerText = minuten;
+																wijzigMinuten(opdracht.id, minuten);
+															}}
+															onClick={(e) => {
+																e.target.contentEditable = true;
+																e.target.focus();
+															}}>
+															{opdracht.seconden && !opdracht.gestoptDoorHost ? (
+																toonMinutenFormat(opdracht.seconden)
+															) : (
+																<FaHashtag
+																	className='inline'
+																	size={14}
+																/>
+															)}
+														</td>
+														<td className='px-4 py-2 text-center'>
+															{opdracht.seconden && !opdracht.gestoptDoorHost ? (
 																opdracht.kanStudentExtraTijdVragen ? (
 																	<FaCheckCircle
+																		onClick={() => wijzigExtraTijdVragen(opdracht.id)}
 																		className='inline hover:scale-110 transition-transform duration-100 hover:text-green-400'
 																		size={26}
 																	/>
 																) : (
 																	<FaTimesCircle
+																		onClick={() => wijzigExtraTijdVragen(opdracht.id)}
 																		className='inline hover:scale-110 transition-transform duration-100 hover:text-red-400'
 																		size={26}
 																	/>

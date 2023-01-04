@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import style from './login.module.css';
-import axios from 'axios';
 import LoadPage from '../../controller/loadPage';
 import Button from '../../components/button/Button';
 import InputText from '../../components/inputText/InputText';
+import Fetch from '../../controller/fetch';
 
 const Login = () => {
 	const emailRef = useRef();
@@ -17,20 +17,18 @@ const Login = () => {
 		const email = emailRef.current.value;
 		const code = codeRef.current.value;
 
-		axios.defaults.withCredentials = true;
-		const data = (await axios.post('http://localhost:5000/login', { email, code, withCredentials: true, headers: { 'Content-Type': 'application/json', Accept: 'application/json' } })).data;
+		if (email.trim() === '' || code.trim() === '') return alert.error('Gelieve alle velden in te vullen');
+
+		const data = await Fetch('login', 'POST', { email, code });
 
 		if (!data.error && data.loggedIn === true) {
-			navigate('/student/dashboard');
-		} else {
-			alert(data.message);
+			return navigate('/student/dashboard');
 		}
+		alert.error(data.message);
 	};
 
 	return (
 		<main className={style.main}>
-			<h1>stan.persoons@student.hogent.be</h1>
-			<h1>202182629</h1>
 			<div className={style.formContainer}>
 				<div className={style.emailContainer}>
 					<label
@@ -40,6 +38,7 @@ const Login = () => {
 					</label>
 					<InputText
 						referace={emailRef}
+						value='stan.persoons@student.hogent.be'
 						placeholder='Enter your email'
 					/>
 				</div>
@@ -51,14 +50,15 @@ const Login = () => {
 					</label>
 					<InputText
 						referace={codeRef}
+						value='202182629'
 						placeholder='Enter your pincode'
 					/>
 				</div>
 				<div className={style.loginContainer}>
 					<Button
-						click={() => loginRequest()}
-						text='Login'
-						style={{ padding: '.4rem 1.4rem', fontSize: '1.6rem', marginTop: '1.4rem' }}
+						text='Maak'
+						click={loginRequest}
+						className='text-xl mt-10 mb-5 text-slate-200 bg-gray-800 w-full'
 					/>
 				</div>
 			</div>

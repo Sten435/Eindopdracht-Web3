@@ -1,12 +1,13 @@
 import React from 'react';
 
-const InputText = ({ placeholder, maxLength, minLength, referace, numberOnly = false, isEmail = false, className }) => {
+const InputText = ({ placeholder, maxLength, minLength, referace, value = '', numberOnly = false, isEmail = false, className }) => {
 	if (numberOnly)
 		return (
 			<input
 				placeholder={placeholder}
 				maxLength={maxLength}
 				minLength={minLength}
+				defaultValue={value}
 				ref={referace}
 				className={'inputText ' + className}
 				min='1'
@@ -21,6 +22,7 @@ const InputText = ({ placeholder, maxLength, minLength, referace, numberOnly = f
 				placeholder={placeholder}
 				maxLength={maxLength}
 				minLength={minLength}
+				defaultValue={value}
 				ref={referace}
 				className={'inputText ' + className}
 				type='email'
@@ -32,6 +34,7 @@ const InputText = ({ placeholder, maxLength, minLength, referace, numberOnly = f
 			placeholder={placeholder}
 			maxLength={maxLength}
 			minLength={minLength}
+			defaultValue={value}
 			ref={referace}
 			className={'inputText ' + className}
 			type='text'

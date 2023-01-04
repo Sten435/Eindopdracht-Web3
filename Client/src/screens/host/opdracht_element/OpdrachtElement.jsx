@@ -1,19 +1,15 @@
+import { useEffect, useRef, useState } from 'react';
 import { FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
-import Rapport from '../../../components/rapport/Rapport.jsx';
-import style from './opdrachtElement.module.css';
-import LoadPage from '../../../controller/loadPage.js';
-import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
-import Fetch from '../../../controller/fetch.js';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useRef } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import { socket } from '../../../controller/socket.js';
-import 'react-toastify/dist/ReactToastify.css';
 import Button from '../../../components/button/Button.jsx';
+import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
 import Header from '../../../components/header/Header.jsx';
+import Rapport from '../../../components/rapport/Rapport.jsx';
 import Section from '../../../components/section/Section.jsx';
+import Fetch from '../../../controller/fetch.js';
+import LoadPage from '../../../controller/loadPage.js';
+import { socket } from '../../../controller/socket.js';
+import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
@@ -26,7 +22,7 @@ const OpdrachtElement = () => {
 	const [gemiddeldeExtraTijd, setGemiddeldeExtraTijd] = useState(0);
 	const [timerTijd, setTimerTijd] = useState();
 
-	const { response, setResponse, loading, error, user } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
+	const { response, updateScreen, loading, error, user } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
 	const getGemiddeldeExtraTijd = async (opdrachtId) => {
 		const result3 = await Fetch(`/opdrachten/extraTijd/${opdrachtId}`, 'GET');
@@ -44,7 +40,7 @@ const OpdrachtElement = () => {
 		const result2 = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
 		if (result2.error) return alert(result2.message);
 
-		socket.emit('toClient', { opdrachtId, action: 'opdrachtGestart' });
+		socket.emit('toClient', { opdrachtId, action: 'refreshData' });
 
 		setTimerTijd(result2.opdracht.seconden);
 		setIsOpdrachtGestart(true);
@@ -73,7 +69,7 @@ const OpdrachtElement = () => {
 		setTimerTijd(Math.round(result.result * 60 + timerTijd));
 		getGemiddeldeExtraTijd(opdrachtId);
 
-		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'voegExtraTijdToe' });
+		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'refreshData' });
 	};
 
 	const vraagHulpEvent = async (data) => {
@@ -85,7 +81,7 @@ const OpdrachtElement = () => {
 
 		const { student } = result;
 
-		toast.warn(
+		alert(
 			<span className='flex justify-center'>
 				<p className='p-1 mb-1 bg-yellow-500 rounded font-bold w-fit text-black'>
 					{student.voorNaam.toUpperCase()} {student.familieNaam}
@@ -112,35 +108,41 @@ const OpdrachtElement = () => {
 		const { opdrachtId: opdrachtID } = data;
 		if (opdrachtID !== opdrachtId) return;
 
-		updateOpdrachten();
+		updateScreen();
 	};
 
 	const addExtraTijdEvent = (data) => {
 		const { opdrachtId: opdrachtID } = data;
 		if (opdrachtID !== opdrachtId) return;
 
-		updateOpdrachten();
+		updateScreen();
 	};
 
 	const wijzigStatusEvent = (data) => {
 		const { opdrachtId: opdrachtID } = data;
 		if (opdrachtID !== opdrachtId) return;
 
-		updateOpdrachten();
-	};
-
-	const updateOpdrachten = async () => {
-		const result = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
-		setResponse(result);
+		updateScreen();
 	};
 
 	useEffect(() => {
 		if (!response) return;
+
 		if (response.opdracht.startDatum) setIsOpdrachtGestart(true);
+		else setIsOpdrachtGestart(false);
+
 		if (response.opdracht.seconden === 0 && response.opdracht.startDatum != null) setIsTijdAfgelopen(true);
+		else setIsTijdAfgelopen(false);
+
 		if (response.opdracht.gestoptDoorHost) setIsOpdrachtGestopt(true);
+		else setIsOpdrachtGestopt(false);
+
 		if (response.opdracht.seconden) setTimerTijd(response.opdracht.seconden);
+		else setTimerTijd();
+
 		if (response.opdracht.kanStudentExtraTijdVragen) setExtraTijdToegestaan(true);
+		else setExtraTijdToegestaan(false);
+
 		getGemiddeldeExtraTijd(opdrachtId);
 	}, [response, opdrachtId]);
 
@@ -148,9 +150,11 @@ const OpdrachtElement = () => {
 		if (!response) return;
 		socket.on('vraagHulp', vraagHulpEvent);
 		socket.on('addVraag', addVraagEvent);
-		socket.on('startRapport', updateOpdrachten);
+		socket.on('startRapport', updateScreen);
 		socket.on('wijzigExtraTijd', addExtraTijdEvent);
 		socket.on('wijzigStatus', wijzigStatusEvent);
+		socket.on('refreshData', updateScreen);
+
 		return () => socket.off();
 	}, [response]);
 
@@ -215,6 +219,7 @@ const OpdrachtElement = () => {
 		<main className={style.main}>
 			<Header
 				title='Host Dashboard'
+				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<div className='flex justify-center items-center flex-col'>
@@ -257,7 +262,7 @@ const OpdrachtElement = () => {
 								key={index}
 								metSluitIcon
 								studentId={rapport.student._id}
-								closeAction={updateOpdrachten}
+								closeAction={updateScreen}
 								studentNaam={rapport.student.voorNaam + ' ' + rapport.student.familieNaam}
 								status={rapport.status}
 								extraTijd={rapport.extraTijd}
@@ -271,7 +276,6 @@ const OpdrachtElement = () => {
 					</div>
 				)}
 			</Section>
-			<ToastContainer />
 		</main>
 	);
 };

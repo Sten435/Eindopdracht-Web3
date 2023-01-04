@@ -87,6 +87,7 @@ const Student = () => {
 		<>
 			<Header
 				title='Admin Opdracht'
+				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<Section noLine>

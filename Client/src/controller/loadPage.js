@@ -20,6 +20,8 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		axios.defaults.withCredentials = true;
 
 		const data = await Fetch(url, method);
+		if (data.error) return alert(data.message);
+
 		setResponse(data);
 	};
 
@@ -69,7 +71,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		}
 	};
 
-	return { response, setResponse, updateScreen, error, loading, user };
+	return { response, updateScreen, error, loading, user };
 };
 
 export default LoadPage;

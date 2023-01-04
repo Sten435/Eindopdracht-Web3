@@ -10,7 +10,6 @@ import HostOpdracht from '../screens/host/opdracht_element/OpdrachtElement';
 
 import AdminDashboard from '../screens/admin/dashboard/Dashboard';
 import AdminOpdracht from '../screens/admin/opdracht/Opdracht';
-import AdminRapport from '../screens/admin/rapport/Rapport';
 import AdminStudent from '../screens/admin/student/Student';
 
 import NotFoundScreen from '../screens/error/404';
@@ -62,10 +61,6 @@ const Navigator = () => {
 			<Route
 				path='admin/opdracht'
 				element={<AdminOpdracht />}
-			/>
-			<Route
-				path='admin/rapport'
-				element={<AdminRapport />}
 			/>
 			<Route
 				path='admin/student'

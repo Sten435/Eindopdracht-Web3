@@ -53,6 +53,28 @@ export const getOpdrachtByNaamEnBeschrijvingFromDB = async (naam, beschrijving) 
 	return data;
 };
 
+export const updateBeschrijvingInDB = async (opdrachtId, beschrijving) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const data = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { beschrijving: beschrijving } });
+
+	return data;
+};
+
+export const updateSecondenInDB = async (opdrachtId, seconden) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const data = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { seconden: parseFloat(seconden) } });
+
+	return data;
+};
+
 export const maakNieuweOpdrachtInDB = async (opdracht) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

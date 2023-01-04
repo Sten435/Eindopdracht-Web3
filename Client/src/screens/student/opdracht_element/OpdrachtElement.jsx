@@ -28,7 +28,7 @@ const OpdrachtElement = () => {
 	const statusFormRef = useRef();
 	const bezigStatusRef = useRef();
 
-	const { response, loading, error, user } = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
+	const { response, updateScreen, loading, error, user } = LoadPage(`/opdrachten/${opdrachtId}`, 'GET');
 
 	const getRapportInfo = async () => {
 		const result = await Fetch(`/rapporten/${user._id}/${opdrachtId}`, 'GET');
@@ -173,6 +173,7 @@ const OpdrachtElement = () => {
 		socket.on('wijzigKanStudentExtraTijdVragen', wijzigKanStudentExtraTijdVragenEvent);
 		socket.on('stopOpdracht', stopOpdrachtEvent);
 		socket.on('removeRapport', removeRapportEvent);
+		socket.on('refreshData', updateScreen);
 
 		return () => socket.off();
 	}, [response]);
@@ -186,6 +187,7 @@ const OpdrachtElement = () => {
 		<main className={style.main}>
 			<Header
 				title='Student'
+				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<Section noLine>
