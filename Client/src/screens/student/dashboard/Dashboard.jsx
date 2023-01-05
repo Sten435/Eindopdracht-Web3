@@ -29,7 +29,12 @@ const Dashboard = () => {
 	let goedeOpdrachten = {};
 
 	for (const key in opdrachten) {
-		if (opdrachten[key].filter((opdracht) => ['lopend'].includes(opdracht.status.toLowerCase())).length > 0) goedeOpdrachten[key] = opdrachten[key];
+		opdrachten[key].forEach((opdracht) => {
+			if (opdracht.status.toLowerCase() === 'lopend') {
+				if (!goedeOpdrachten[key]) goedeOpdrachten[key] = [];
+				goedeOpdrachten[key].push(opdracht);
+			}
+		});
 	}
 
 	return (

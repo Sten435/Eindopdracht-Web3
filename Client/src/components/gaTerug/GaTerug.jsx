@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
-const GaTerug = ({ text, to = null, textKleur = 'white', backgroundKleur = 'rgba(221, 7, 7, 0.771)', children = null }) => {
+const GaTerug = ({ text, to = null, textKleur = 'white', backgroundKleur = 'bg-red-500', children = null }) => {
 	return (
-		<div style={{ backgroundColor: backgroundKleur, padding: '6px', borderRadius: '4px' }}>
+		<div className={`p-[6px] rounded ${backgroundKleur}`}>
 			<Link
 				style={{ color: textKleur }}
 				to={to ?? -1}>

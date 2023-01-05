@@ -31,7 +31,7 @@ const Header = ({ title, name, metTerugButton = false, metLogoutButton = false }
 						{metTerugButton && !metLogoutButton && (
 							<GaTerug
 								className='drop-shadow-sm'
-								backgroundKleur='#374151'
+								backgroundKleur='bg-gray-700'
 								text='Ga Terug'
 							/>
 						)}

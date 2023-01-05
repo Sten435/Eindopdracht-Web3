@@ -203,7 +203,7 @@ const OpdrachtElement = () => {
 			<Section noLine>
 				<div className='flex flex-col items-center mt-10'>
 					{tijd && tijd !== 0 && (
-						<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded-md'>
+						<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded'>
 							<FaClock
 								className='mr-5 ml-2'
 								size={30}

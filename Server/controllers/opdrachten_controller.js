@@ -1,4 +1,4 @@
-import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB, getOpdrachtByNaamEnBeschrijvingFromDB, maakNieuweOpdrachtInDB, verwijderdOpdrachtFromDB, updateBeschrijvingInDB, updateSecondenInDB } from '../database/repositorys/opdrachten_repo.js';
+import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB, getOpdrachtByNaamEnBeschrijvingFromDB, maakNieuweOpdrachtInDB, verwijderdOpdrachtFromDB, updateBeschrijvingInDB, updateSecondenInDB, stopOpdrachtInDB } from '../database/repositorys/opdrachten_repo.js';
 import { getRapportenByOpdrachtId } from '../controllers/rapport_controller.js';
 
 export const getOpdrachten = async () => {
@@ -135,6 +135,10 @@ export const getGemiddeldeExtraTijd = async (opdrachtId) => {
 
 export const startOpdracht = async (opdrachtId) => {
 	return await startOpdrachtInDB(opdrachtId);
+};
+
+export const stopOpdracht = async (opdrachtId) => {
+	return await stopOpdrachtInDB(opdrachtId);
 };
 
 export const verwijderdOpdracht = async (opdrachtId) => {

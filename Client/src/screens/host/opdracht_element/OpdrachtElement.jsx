@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FaClock, FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
+import { HiRefresh } from 'react-icons/hi';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/button/Button.jsx';
 import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
@@ -130,6 +131,18 @@ const OpdrachtElement = () => {
 		navigate('/host/dashboard');
 	};
 
+	const herstartOpdracht = async () => {
+		const result = await Fetch('/opdrachten/stop', 'POST', { opdrachtId: opdrachtId });
+		if (result.error) return alert.error(result.message);
+
+		const result2 = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
+		if (result2.error) return alert.error(result2.message);
+
+		setTimerTijd(result2.opdracht.seconden);
+		setIsOpdrachtGestart(false);
+		opdrachtenGewijzigd();
+	};
+
 	useEffect(() => {
 		if (!response) return;
 
@@ -172,22 +185,11 @@ const OpdrachtElement = () => {
 
 	const titel = opdracht.beschrijving;
 
-	let actieButton = null;
-	if (!isOpdrachtGestart && !isTijdAfgelopen) {
-		actieButton = (
-			<Button
-				text='Start'
-				className='m-0 text-2xl'
-				click={startOpdracht}
-				referace={actieButtonRef}
-			/>
-		);
-	}
-
 	let countDownTimer;
+	let isAfgelopen = false;
 	if (isOpdrachtGestart && timerTijd) {
 		countDownTimer = (
-			<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded-md'>
+			<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded'>
 				<FaClock
 					className='mr-5 ml-2'
 					size={30}
@@ -199,10 +201,37 @@ const OpdrachtElement = () => {
 						setIsTijdAfgelopen(true);
 					}}
 				/>
+				<HiRefresh
+					className='ml-5 p-1 bg-cyan-500 opacity-50 cursor-pointer hover:opacity-100 rounded'
+					onClick={herstartOpdracht}
+					size={35}
+				/>
 			</span>
 		);
 	} else if (isTijdAfgelopen || !timerTijd) {
-		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-gray-700 font-bold underline rounded-md'>Tijd is afgelopen</div>;
+		countDownTimer = (
+			<>
+				<div className='text-2xl p-2 pl-2 flex items-center text-white bg-red-500 font-bold rounded'>Tijd is afgelopen</div>
+				<HiRefresh
+					className='ml-2 p-1 bg-gray-500 text-white opacity-50 cursor-pointer hover:opacity-100 rounded'
+					onClick={herstartOpdracht}
+					size={50}
+				/>
+			</>
+		);
+		isAfgelopen = true;
+	}
+
+	let actieButton = null;
+	if (!isOpdrachtGestart && !isTijdAfgelopen) {
+		actieButton = (
+			<Button
+				text='Start'
+				className='m-0 text-2xl'
+				click={startOpdracht}
+				referace={actieButtonRef}
+			/>
+		);
 	}
 
 	let extraTijdButton;
@@ -224,17 +253,17 @@ const OpdrachtElement = () => {
 					{countDownTimer && <div className='w-full flex justify-center'>{countDownTimer}</div>}
 					{actieButton && <div className='w-full flex justify-center'>{actieButton}</div>}
 				</div>
-				{isOpdrachtGestart && (
+				{isOpdrachtGestart && !isAfgelopen && (
 					<div className='flex w-80 mt-5 justify-between'>
 						<div className='w-full flex justify-center'>
 							<div
-								className={'text-2xl flex justify-center pb-2 pl-2 w-20 pr-2 pt-2 text-white font-bold cursor-pointer rounded-md ' + (extraTijdToegestaan ? 'bg-green-500' : 'bg-red-500')}
+								className={'text-2xl flex justify-center pb-2 pl-2 w-20 pr-2 pt-2 text-white font-bold cursor-pointer rounded ' + (extraTijdToegestaan ? 'bg-green-500' : 'bg-red-500')}
 								onClick={wijzigKanStudentExtraTijdVragen}>
 								{extraTijdButton}
 							</div>
 						</div>
 						<div className='w-full flex justify-center'>
-							<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-orange-500 font-bold rounded-md '>
+							<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-orange-500 font-bold rounded '>
 								<span
 									className='text-xl cursor-pointer hover:underline flex justify-center items-center'
 									onClick={voegGemiddeldeExtraTijdToe}>
@@ -269,7 +298,7 @@ const OpdrachtElement = () => {
 					})
 				) : (
 					<div className='flex justify-center'>
-						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-gray-700 font-bold rounded-md'>Er zijn nog geen rapporten</h1>
+						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-gray-700 font-bold rounded'>Er zijn nog geen rapporten</h1>
 					</div>
 				)}
 			</Section>

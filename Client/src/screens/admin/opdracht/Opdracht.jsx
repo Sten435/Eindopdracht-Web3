@@ -167,7 +167,7 @@ const Student = () => {
 									</option>
 								))}
 							</select>
-							<div className='mt-2 mb-[1rem] overflow-hidden overflow-x-auto rounded-lg border border-gray-200'>
+							<div className='mt-2 mb-[1rem] overflow-hidden overflow-x-auto rounded border border-gray-200'>
 								<table className='min-w-full divide-y divide-gray-200 bg-gray-100 text-sm'>
 									<thead className='border-b-2 border-gray-200'>
 										<tr className='bg-gray-100'>

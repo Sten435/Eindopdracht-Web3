@@ -12,9 +12,10 @@ const Card = (result) => {
 
 	const [isLopend, setIsLopend] = useState(startDatum && !seconden);
 
-	let countDownTimer;
+	let countDownTimer, boxColor;
 	if (isLopend) {
-		countDownTimer = 'Tijd is afgelopen';
+		countDownTimer = 'Tijd Is Afgelopen';
+		boxColor = 'bg-red-500';
 	} else if (startDatum) {
 		countDownTimer = (
 			<CountdownTimer
@@ -22,8 +23,10 @@ const Card = (result) => {
 				onEnd={() => setIsLopend(true)}
 			/>
 		);
+		boxColor = 'bg-green-500';
 	} else {
-		countDownTimer = 'Niet begonnen';
+		countDownTimer = 'Niet Gestart';
+		boxColor = 'bg-gray-500';
 	}
 
 	return (
@@ -35,8 +38,8 @@ const Card = (result) => {
 					<h2>{naam}</h2>
 					<p style={{ marginBottom: '20px' }}>{beschrijving}</p>
 					<span>
-						{!isLopend && startDatum && 'Resterend:'}
-						<b className='bg-indigo-400 text-white p-2 ml-0 rounded-md'>{countDownTimer}</b>
+						{!isLopend && startDatum && <p className='mr-2 inline'>Resterend:</p>}
+						<b className={`text-white p-1 px-2 ml-0 rounded ${boxColor}`}>{countDownTimer}</b>
 					</span>
 				</div>
 				{status && <span className={style.statusContainer + ' ' + style[status]}>{status}</span>}

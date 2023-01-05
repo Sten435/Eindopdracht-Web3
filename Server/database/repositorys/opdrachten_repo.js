@@ -104,6 +104,17 @@ export const startOpdrachtInDB = async (opdrachtId) => {
 	return result;
 };
 
+export const stopOpdrachtInDB = async (opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+	const database = client.db('web3');
+	const opdrachten = database.collection('opdrachten');
+
+	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { startDatum: null, kanStudentExtraTijdVragen: true } });
+
+	return result;
+};
+
 export const wijzigExtraTijdVragenInDB = async (opdrachtId, newValueExtraTijd) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);
