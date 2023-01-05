@@ -1,0 +1,7 @@
+# Geïmplementeerd extra's
+
+* *Authenticatie*
+* *Websockets*
+* *CSV-upload*
+* *Beheer via UI van studenten*
+* *MongoDB*

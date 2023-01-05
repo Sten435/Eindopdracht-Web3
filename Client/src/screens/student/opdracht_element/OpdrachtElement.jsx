@@ -145,17 +145,23 @@ const OpdrachtElement = () => {
 		setKanStudentExtraTijdVragen(extraTijdToegestaan);
 	};
 
-	const stopOpdrachtEvent = () => {
-		navigate('/student/dashboard', { replace: true, state: { reden: 'Opdracht is afgelopen' } });
-	};
-
 	const removeRapportEvent = (data) => {
 		const { opdrachtId: opdrachtID, userId } = data;
 
 		if (opdrachtID !== opdrachtId) return;
 		if (userId !== user._id) return;
 
-		navigate('/student/dashboard', { replace: true, state: { reden: 'Rapport is verwijderd door host' } });
+		alert('Rapport is verwijderd door host');
+		navigate('/student/dashboard');
+	};
+
+	const removeOpdrachtEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+
+		if (opdrachtID !== opdrachtId) return;
+
+		alert('Opdracht is verwijderd door host');
+		navigate('/student/dashboard');
 	};
 
 	useEffect(() => {
@@ -171,14 +177,18 @@ const OpdrachtElement = () => {
 	useEffect(() => {
 		socket.on('voegExtraTijdToe', voegExtraTijdToeEvent);
 		socket.on('wijzigKanStudentExtraTijdVragen', wijzigKanStudentExtraTijdVragenEvent);
-		socket.on('stopOpdracht', stopOpdrachtEvent);
 		socket.on('removeRapport', removeRapportEvent);
+		socket.on('removeOpdracht', removeOpdrachtEvent);
 		socket.on('refreshData', updateScreen);
 
 		return () => socket.off();
 	}, [response]);
 
-	if (error) return <p>Er is iets fout gegaan</p>;
+	if (error) {
+		alert(error.message);
+		navigate('/student/dashboard');
+	}
+
 	if (loading || selectedRadioButton === undefined) return <p>Loading...</p>;
 
 	const { naam, beschrijving } = response.opdracht;
@@ -191,12 +201,12 @@ const OpdrachtElement = () => {
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
 			<Section noLine>
-				<div className={style.helpContainer}>
+				<div className='flex flex-col items-center mt-10'>
 					{tijd && tijd !== 0 && (
-						<span className='text-2xl pb-1 pl-2 pr-2 pt-1 mb-4 mr-2 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>
+						<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded-md'>
 							<FaClock
-								className='mr-5'
-								size={25}
+								className='mr-5 ml-2'
+								size={30}
 							/>
 							<CountdownTimer
 								seconden={tijd}
@@ -204,19 +214,19 @@ const OpdrachtElement = () => {
 							/>
 						</span>
 					)}
-					<h1 className='text-2xl underline font-bold mb-2'>{naam}</h1>
-					<p className='m-4'>{beschrijving}</p>
+					<h1 className='mt-5 mb-2 text-center text-gray-700 font-bold text-2xl'>{naam}</h1>
+					<p className='m-4 text-center'>{beschrijving}</p>
 					<div className='flex'>
 						{!bestaatRapport && (
 							<Button
 								text='Start Opdracht'
-								className='mt-8 mr-5 text-2xl'
+								className='mt-5 text-2xl'
 								click={startReport}
 							/>
 						)}
 						{bestaatRapport && (
 							<Button
-								className='mt-8 ml-5 text-2xl'
+								className='mt-5 text-2xl'
 								text='Vraag Hulp 👋'
 								click={vraagHulp}
 							/>

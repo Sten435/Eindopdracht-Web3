@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
-import { useParams } from 'react-router-dom';
+import { FaClock, FaHandPaper, FaLock, FaLockOpen, FaPlusSquare } from 'react-icons/fa';
+import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../../../components/button/Button.jsx';
 import CountdownTimer from '../../../components/counter/CountdownTimer.jsx';
 import Header from '../../../components/header/Header.jsx';
@@ -9,18 +9,18 @@ import Section from '../../../components/section/Section.jsx';
 import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
-import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
 	const actieButtonRef = useRef();
 
 	const [isOpdrachtGestart, setIsOpdrachtGestart] = useState(false);
-	const [isOpdrachtBeeindigd, setIsOpdrachtGestopt] = useState(false);
 	const [isTijdAfgelopen, setIsTijdAfgelopen] = useState(false);
 	const [extraTijdToegestaan, setExtraTijdToegestaan] = useState(false);
 	const [gemiddeldeExtraTijd, setGemiddeldeExtraTijd] = useState(0);
 	const [timerTijd, setTimerTijd] = useState();
+
+	const navigate = useNavigate();
 
 	const { response, updateScreen, loading, error, user } = LoadPage(`/rapporten/${opdrachtId}`, 'GET');
 
@@ -31,6 +31,7 @@ const OpdrachtElement = () => {
 		const { seconden } = result3.result;
 
 		setGemiddeldeExtraTijd(seconden);
+		opdrachtenGewijzigd();
 	};
 
 	const startOpdracht = async () => {
@@ -40,26 +41,17 @@ const OpdrachtElement = () => {
 		const result2 = await Fetch(`/rapporten/${opdrachtId}`, 'GET');
 		if (result2.error) return alert(result2.message);
 
-		socket.emit('toClient', { opdrachtId, action: 'refreshData' });
-
 		setTimerTijd(result2.opdracht.seconden);
 		setIsOpdrachtGestart(true);
-	};
-
-	const stopOpdracht = async () => {
-		const result = await Fetch('/opdrachten/stop', 'POST', { opdrachtId: opdrachtId });
-		if (result.error) return alert(result.message);
-
-		socket.emit('toClient', { opdrachtId, action: 'stopOpdracht' });
-		setIsOpdrachtGestopt(true);
+		opdrachtenGewijzigd();
 	};
 
 	const wijzigKanStudentExtraTijdVragen = async () => {
 		const result = await Fetch('/opdrachten/wijzigExtraTijdVragen', 'POST', { opdrachtId: opdrachtId });
 		if (result.error) return alert(result.message);
 
-		socket.emit('toClient', { opdrachtId, extraTijdToegestaan: !extraTijdToegestaan, action: 'wijzigKanStudentExtraTijdVragen' });
 		setExtraTijdToegestaan(!extraTijdToegestaan);
+		opdrachtenGewijzigd();
 	};
 
 	const voegGemiddeldeExtraTijdToe = async () => {
@@ -69,7 +61,7 @@ const OpdrachtElement = () => {
 		setTimerTijd(Math.round(result.result * 60 + timerTijd));
 		getGemiddeldeExtraTijd(opdrachtId);
 
-		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'refreshData' });
+		socket.emit('toClient', { opdrachtId, nieuweTijd: Math.round(result.result * 60 + timerTijd), action: 'voegExtraTijdToe' });
 	};
 
 	const vraagHulpEvent = async (data) => {
@@ -125,6 +117,19 @@ const OpdrachtElement = () => {
 		updateScreen();
 	};
 
+	const opdrachtenGewijzigd = () => {
+		socket.emit('toClient', { action: 'refreshData' });
+	};
+
+	const removeOpdrachtEvent = (data) => {
+		const { opdrachtId: opdrachtID } = data;
+
+		if (opdrachtID !== opdrachtId) return;
+
+		alert('De opdracht is verwijderd door de host');
+		navigate('/host/dashboard');
+	};
+
 	useEffect(() => {
 		if (!response) return;
 
@@ -133,9 +138,6 @@ const OpdrachtElement = () => {
 
 		if (response.opdracht.seconden === 0 && response.opdracht.startDatum != null) setIsTijdAfgelopen(true);
 		else setIsTijdAfgelopen(false);
-
-		if (response.opdracht.gestoptDoorHost) setIsOpdrachtGestopt(true);
-		else setIsOpdrachtGestopt(false);
 
 		if (response.opdracht.seconden) setTimerTijd(response.opdracht.seconden);
 		else setTimerTijd();
@@ -147,18 +149,22 @@ const OpdrachtElement = () => {
 	}, [response, opdrachtId]);
 
 	useEffect(() => {
-		if (!response) return;
 		socket.on('vraagHulp', vraagHulpEvent);
 		socket.on('addVraag', addVraagEvent);
 		socket.on('startRapport', updateScreen);
 		socket.on('wijzigExtraTijd', addExtraTijdEvent);
 		socket.on('wijzigStatus', wijzigStatusEvent);
+		socket.on('removeOpdracht', removeOpdrachtEvent);
 		socket.on('refreshData', updateScreen);
 
 		return () => socket.off();
 	}, [response]);
 
-	if (error) return <h1>Er is iets fout gegaan</h1>;
+	if (error) {
+		alert(error.message);
+		navigate('/host/dashboard');
+	}
+
 	if (loading) return <h1>Loading...</h1>;
 
 	if (response.error) return alert(response.message);
@@ -166,7 +172,7 @@ const OpdrachtElement = () => {
 
 	const titel = opdracht.beschrijving;
 
-	let actieButton;
+	let actieButton = null;
 	if (!isOpdrachtGestart && !isTijdAfgelopen) {
 		actieButton = (
 			<Button
@@ -176,23 +182,16 @@ const OpdrachtElement = () => {
 				referace={actieButtonRef}
 			/>
 		);
-	} else {
-		if (!isOpdrachtBeeindigd || isTijdAfgelopen) {
-			actieButton = (
-				<Button
-					text='Beëindig'
-					className='m-0 text-2xl'
-					click={stopOpdracht}
-					referace={actieButtonRef}
-				/>
-			);
-		}
 	}
 
 	let countDownTimer;
-	if (isOpdrachtGestart && !isOpdrachtBeeindigd && timerTijd) {
+	if (isOpdrachtGestart && timerTijd) {
 		countDownTimer = (
-			<div className='text-2xl pb-1 pl-2 pr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>
+			<span className='text-4xl p-2 mb-4 pr-4 flex items-center text-white bg-gray-700 font-bold rounded-md'>
+				<FaClock
+					className='mr-5 ml-2'
+					size={30}
+				/>
 				<CountdownTimer
 					seconden={timerTijd}
 					onEnd={() => {
@@ -200,12 +199,10 @@ const OpdrachtElement = () => {
 						setIsTijdAfgelopen(true);
 					}}
 				/>
-			</div>
+			</span>
 		);
-	} else if (isOpdrachtBeeindigd) {
-		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>Opdracht is beeindigd</div>;
 	} else if (isTijdAfgelopen || !timerTijd) {
-		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-indigo-500 font-bold underline rounded-md'>Tijd is afgelopen</div>;
+		countDownTimer = <div className='text-2xl pb-1 pl-2 pr-2 mr-2 pt-1 flex items-center text-white bg-gray-700 font-bold underline rounded-md'>Tijd is afgelopen</div>;
 	}
 
 	let extraTijdButton;
@@ -216,18 +213,18 @@ const OpdrachtElement = () => {
 	}
 
 	return (
-		<main className={style.main}>
+		<>
 			<Header
-				title='Host Dashboard'
+				title='Host'
 				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
-			<div className='flex justify-center items-center flex-col'>
+			<div className='mt-10 flex justify-center items-center flex-col'>
 				<div className='flex w-80 justify-between'>
-					<div className='w-full flex justify-center'>{countDownTimer}</div>
-					<div className='w-full flex justify-center'>{actieButton}</div>
+					{countDownTimer && <div className='w-full flex justify-center'>{countDownTimer}</div>}
+					{actieButton && <div className='w-full flex justify-center'>{actieButton}</div>}
 				</div>
-				{isOpdrachtGestart && !isOpdrachtBeeindigd && (
+				{isOpdrachtGestart && (
 					<div className='flex w-80 mt-5 justify-between'>
 						<div className='w-full flex justify-center'>
 							<div
@@ -272,11 +269,11 @@ const OpdrachtElement = () => {
 					})
 				) : (
 					<div className='flex justify-center'>
-						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-indigo-600 font-bold rounded-md'>Er zijn nog geen rapporten</h1>
+						<h1 className='text-2xl text-center pb-2 pl-2 pr-2 pt-2 mt-5 text-white bg-gray-700 font-bold rounded-md'>Er zijn nog geen rapporten</h1>
 					</div>
 				)}
 			</Section>
-		</main>
+		</>
 	);
 };
 

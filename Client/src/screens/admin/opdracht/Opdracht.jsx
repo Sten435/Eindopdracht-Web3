@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FaCheck, FaCheckCircle, FaHashtag, FaTimesCircle, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaHashtag, FaTimes, FaTrash } from 'react-icons/fa';
 import Button from '../../../components/button/Button';
+import CountdownTimer from '../../../components/counter/CountdownTimer';
 import Header from '../../../components/header/Header';
 import InputText from '../../../components/inputText/InputText';
 import Section from '../../../components/section/Section';
@@ -10,6 +11,7 @@ import { socket } from '../../../controller/socket';
 
 const Student = () => {
 	const [geselecteerdeOpdrachtNaam, setGeselecteerdeOpdrachtNaam] = useState();
+	const [geselecteerdeTijd, setGeselecteerdeTijd] = useState();
 
 	const { response, updateScreen, loading, error, user } = LoadPage('opdrachten', 'GET');
 
@@ -39,6 +41,9 @@ const Student = () => {
 		const result = await Fetch(`opdrachten/${id}`, 'DELETE', { opdrachtId: id });
 		if (result.error) return alert(result.message);
 
+		socket.emit('toClient', { opdrachtId: id, action: 'removeOpdracht' });
+
+		setGeselecteerdeOpdrachtNaam(response.opdrachten[Object.keys(response.opdrachten)[0]].naam);
 		updateScreen();
 		opdrachtenGewijzigd();
 	};
@@ -57,24 +62,6 @@ const Student = () => {
 		setGeselecteerdeOpdrachtNaam(opdrachtNaam);
 	};
 
-	const stopOpdracht = async (id, gestopt) => {
-		if (!id || gestopt === true || gestopt === undefined) return;
-
-		const actie = 'stop';
-
-		const result = await Fetch(`opdrachten/${actie}`, 'POST', { opdrachtId: id });
-		if (result.error) return alert(result.message);
-
-		updateScreen();
-		opdrachtenGewijzigd();
-	};
-
-	const toonMinutenFormat = (seconden) => {
-		const minuten = seconden / 60;
-
-		return minuten % 1 === 0 ? minuten : minuten.toFixed(1);
-	};
-
 	const updateOpdracht = (opdrachtId, beschrijving) => {
 		if (!opdrachtId || !beschrijving) return;
 
@@ -88,7 +75,7 @@ const Student = () => {
 	const wijzigMinuten = (opdrachtId, minuten) => {
 		if (!opdrachtId || !minuten) return;
 
-		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { minuten: minuten });
+		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { minuten: minuten / 60 });
 		if (result.error) return alert.info(result.message);
 
 		updateScreen();
@@ -106,6 +93,10 @@ const Student = () => {
 			const naam = Object.keys(response.opdrachten)[0];
 			setGeselecteerdeOpdrachtNaam(naam);
 		}
+
+		socket.on('refreshData', updateScreen);
+
+		return () => socket.off();
 	}, [response]);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
@@ -115,8 +106,6 @@ const Student = () => {
 	const { opdrachten } = response;
 
 	const zijnErOpdrachten = Object.keys(opdrachten).length > 0;
-
-	if (geselecteerdeOpdrachtNaam && !Object.keys(opdrachten).includes(geselecteerdeOpdrachtNaam)) return setGeselecteerdeOpdrachtNaam(null);
 
 	return (
 		<>
@@ -167,10 +156,10 @@ const Student = () => {
 						<>
 							<h2 className='mt-10 text-gray-700 font-bold text-2xl'>Kies een opdracht</h2>
 							<select
-								className='mb-4 mt-2 pr-2 pl-2 text-2xl w-fit rounded'
+								className='mb-4 mt-2 p-2 text-2xl w-fit rounded focus:outline-none'
 								onChange={comboBoxSelectionChanged}
-								defaultValue={geselecteerdeOpdrachtNaam}>
-								{Object.keys(opdrachten).map((key, index) => (
+								value={geselecteerdeOpdrachtNaam}>
+								{Object.keys(opdrachten)?.map((key, index) => (
 									<option
 										key={index}
 										value={key}>
@@ -180,33 +169,24 @@ const Student = () => {
 							</select>
 							<div className='mt-2 mb-[1rem] overflow-hidden overflow-x-auto rounded-lg border border-gray-200'>
 								<table className='min-w-full divide-y divide-gray-200 bg-gray-100 text-sm'>
-									<thead>
+									<thead className='border-b-2 border-gray-200'>
 										<tr className='bg-gray-100'>
-											<th className='px-4 py-2 text-left font-medium text-gray-900'></th>
-											<th className='px-4 py-2 text-left font-medium text-gray-900'>Beschrijving</th>
-											<th className='px-4 py-2 text-center font-medium text-gray-900'>Startdatum</th>
-											<th className='px-4 py-2 text-center font-medium text-gray-900'>Minuten</th>
-											<th className='px-4 py-2 text-center font-medium text-gray-900'>ExtraTijd</th>
-											<th className='px-4 py-2 text-center font-medium text-gray-900'>Status</th>
-											<th className='px-4 py-2 text-center font-medium text-gray-900'>Gestopt</th>
+											<th className='px-4 py-2 text-left font-extrabold text-gray-900'>Beschrijving</th>
+											<th className='px-4 py-2 text-center font-extrabold text-gray-900'>Startdatum</th>
+											<th className='px-4 py-2 text-center font-extrabold text-gray-900'>Seconden</th>
+											<th className='px-4 py-2 text-center font-extrabold text-gray-900'>ExtraTijd</th>
+											<th className='px-4 py-2 text-left font-extrabold text-gray-900'>Delete</th>
 										</tr>
 									</thead>
 									<tbody>
 										{geselecteerdeOpdrachtNaam &&
-											opdrachten[geselecteerdeOpdrachtNaam].map((opdracht, index) => {
+											opdrachten[geselecteerdeOpdrachtNaam]?.map((opdracht, index) => {
 												return (
 													<tr
 														key={index}
-														className='odd:bg-gray-100 even:bg-gray-200 relative group/row hover:text-white hover:bg-gray-700 transition-colors duration-100 cursor-pointer'>
-														<td className='px-4 pl-4 pr-0 py-2 text-center hover:bg-gray-700 cursor-pointer'>
-															<FaTrash
-																className='inline hover:scale-110 transition-transform duration-100 hover:text-red-400'
-																size={14}
-																onClick={() => removeOpdracht(opdracht.id)}
-															/>
-														</td>
+														className='odd:bg-gray-100 even:bg-gray-200 relative hover:text-white hover:bg-gray-700 transition-colors duration-100 cursor-pointer'>
 														<td
-															className='pr-6 pl-5 py-2 max-w-prose cursor-text select-none focus:border-dashed focus:border-orange-500 focus:outline-none focus:-z-40 focus:border-2'
+															className='pr-6 pl-5 py-2 max-w-prose cursor-text select-none focus:border-dashed focus:bg-orange-200 focus:font-medium focus:text-gray-700 focus:outline-none'
 															onBlur={(e) => {
 																e.target.contentEditable = false;
 																updateOpdracht(opdracht.id, e.target.innerText);
@@ -218,76 +198,83 @@ const Student = () => {
 															{opdracht.beschrijving}
 														</td>
 														<td className='px-4 py-2 text-center'>
-															{opdracht.startDatum && !opdracht.gestoptDoorHost ? (
+															{opdracht.startDatum ? (
 																new Date(opdracht.startDatum).toLocaleString()
 															) : (
 																<FaHashtag
 																	className='inline'
-																	size={14}
-																/>
-															)}
-														</td>
-														<td
-															className='px-4 py-2 text-center'
-															onBlur={(e) => {
-																e.target.contentEditable = false;
-
-																const minuten = toonMinutenFormat(e.target.innerText * 60);
-																if (!parseFloat(minuten)) return alert.error('Geen geldige tijd');
-
-																e.target.innerText = minuten;
-																wijzigMinuten(opdracht.id, minuten);
-															}}
-															onClick={(e) => {
-																e.target.contentEditable = true;
-																e.target.focus();
-															}}>
-															{opdracht.seconden && !opdracht.gestoptDoorHost ? (
-																toonMinutenFormat(opdracht.seconden)
-															) : (
-																<FaHashtag
-																	className='inline'
+																	opacity={0.2}
 																	size={14}
 																/>
 															)}
 														</td>
 														<td className='px-4 py-2 text-center'>
-															{opdracht.seconden && !opdracht.gestoptDoorHost ? (
+															{opdracht.seconden ? (
+																<span
+																	onBlur={(e) => {
+																		if (opdracht.startDatum) return;
+
+																		e.target.contentEditable = false;
+																		const seconden = e.target.innerText;
+
+																		if (geselecteerdeTijd === seconden) return;
+																		if (!parseInt(seconden) || seconden.trim() === '') return alert.error('Geen geldige tijd');
+
+																		wijzigMinuten(opdracht.id, seconden);
+																		alert('Tijd gewijzigd');
+																	}}
+																	onClick={(e) => {
+																		if (opdracht.startDatum) return;
+																		setGeselecteerdeTijd(e.target.innerText);
+
+																		e.target.contentEditable = true;
+																		e.target.focus();
+																	}}>
+																	<CountdownTimer
+																		className='p-2'
+																		start={opdracht.startDatum}
+																		onEnd={updateScreen}
+																		inSeconds
+																		seconden={opdracht.seconden}
+																	/>
+																</span>
+															) : (
+																<FaHashtag
+																	className='inline'
+																	opacity={0.2}
+																	size={14}
+																/>
+															)}
+														</td>
+														<td className='px-4 py-2 text-center'>
+															{opdracht.seconden ? (
 																opdracht.kanStudentExtraTijdVragen ? (
-																	<FaCheckCircle
+																	<FaCheck
 																		onClick={() => wijzigExtraTijdVragen(opdracht.id)}
-																		className='inline hover:scale-110 transition-transform duration-100 hover:text-green-400'
-																		size={26}
+																		className='inline bg-green-500 rounded text-white p-1 hover:scale-110 hover:bg-white hover:text-green-500 transition-transform duration-100 hover:green-red-500'
+																		size={30}
 																	/>
 																) : (
-																	<FaTimesCircle
+																	<FaTimes
 																		onClick={() => wijzigExtraTijdVragen(opdracht.id)}
-																		className='inline hover:scale-110 transition-transform duration-100 hover:text-red-400'
-																		size={26}
+																		className='inline bg-red-500 rounded text-white p-1 hover:scale-110 hover:bg-white hover:text-red-500 transition-transform duration-100 hover:green-red-500'
+																		size={30}
 																	/>
 																)
 															) : (
 																<FaHashtag
 																	className='inline'
+																	opacity={0.2}
 																	size={14}
 																/>
 															)}
 														</td>
-														<td className='px-4 py-2 text-center'>{opdracht.status}</td>
-														<td
-															className='px-4 py-2 text-center'
-															onClick={() => stopOpdracht(opdracht.id, opdracht.gestoptDoorHost)}>
-															{opdracht.gestoptDoorHost ? (
-																<FaCheck
-																	className='inline cursor-not-allowed'
-																	size={20}
-																/>
-															) : (
-																<FaTimesCircle
-																	className='inline cursor-hover hover:text-red-400'
-																	size={26}
-																/>
-															)}
+														<td className='px-4 py-2 text-center cursor-pointer'>
+															<FaTrash
+																className='inline bg-red-500 rounded text-white p-[.4rem] hover:scale-110 hover:bg-white transition-transform duration-100 hover:text-red-500'
+																size={30}
+																onClick={() => removeOpdracht(opdracht.id)}
+															/>
 														</td>
 													</tr>
 												);

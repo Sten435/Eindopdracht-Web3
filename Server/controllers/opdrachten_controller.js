@@ -1,4 +1,4 @@
-import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, stopOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB, getOpdrachtByNaamEnBeschrijvingFromDB, maakNieuweOpdrachtInDB, verwijderdOpdrachtFromDB, updateBeschrijvingInDB, updateSecondenInDB } from '../database/repositorys/opdrachten_repo.js';
+import { getOpdrachtenFromDB, getOpdrachtByIdFromDB, startOpdrachtInDB, wijzigExtraTijdVragenInDB, voegExtraTijdToeInDB, getOpdrachtByNaamEnBeschrijvingFromDB, maakNieuweOpdrachtInDB, verwijderdOpdrachtFromDB, updateBeschrijvingInDB, updateSecondenInDB } from '../database/repositorys/opdrachten_repo.js';
 import { getRapportenByOpdrachtId } from '../controllers/rapport_controller.js';
 
 export const getOpdrachten = async () => {
@@ -22,10 +22,6 @@ export const getOpdrachten = async () => {
 
 			if (timeLeft < 0) {
 				status = 'Afgelopen';
-			}
-
-			if (opdracht.gestoptDoorHost) {
-				status = 'Beeindigd';
 			}
 
 			return {
@@ -68,10 +64,6 @@ export const getOpdrachtById = async (opdrachtId) => {
 		status = 'Afgelopen';
 	}
 
-	if (result[0].gestoptDoorHost) {
-		status = 'Beeindigd';
-	}
-
 	let opdracht = {
 		...result[0],
 		seconden: timeLeft >= 0 ? timeLeft : null,
@@ -110,10 +102,6 @@ export const getOpdrachtByNaamEnBeschrijving = async (naam, beschrijving) => {
 		status = 'Afgelopen';
 	}
 
-	if (result[0].gestoptDoorHost) {
-		status = 'Beeindigd';
-	}
-
 	let opdracht = {
 		...result[0],
 		seconden: timeLeft >= 0 ? timeLeft : null,
@@ -130,7 +118,6 @@ export const maakNieuweOpdracht = async (naam, beschrijving, seconden) => {
 		seconden: seconden,
 		startDatum: null,
 		kanStudentExtraTijdVragen: true,
-		gestoptDoorHost: false,
 	};
 	return await maakNieuweOpdrachtInDB(opdracht);
 };
@@ -172,8 +159,4 @@ export const voegExtraTijdToe = async (opdrachtId) => {
 	await voegExtraTijdToeInDB(opdrachtId, gemiddeldeextraTijd);
 
 	return gemiddeldeextraTijd;
-};
-
-export const stopOpdracht = async (opdrachtId) => {
-	return await stopOpdrachtInDB(opdrachtId);
 };

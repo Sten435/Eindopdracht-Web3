@@ -8,6 +8,7 @@ const OpdrachtenLijst = ({ opdrachten, type }) => {
 		opdrachtenLijst.push(
 			<Section
 				title={key}
+				noLine
 				key={key}>
 				{opdrachten[key].map((opdracht, index) => {
 					if (type === 'student' && (opdracht.status === 'Beeindigd' || opdracht.status === 'Afgelopen')) return;

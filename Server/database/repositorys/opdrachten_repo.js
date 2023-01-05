@@ -1,4 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb';
+import { deleteRapportenByOpdrachtFromDB } from './rapport_repo.js';
 
 export const getOpdrachtenFromDB = async () => {
 	const uri = process.env.MONGODB_URI;
@@ -14,7 +15,7 @@ export const getOpdrachtenFromDB = async () => {
 		if (!dictionary[item.naam]) {
 			dictionary[item.naam] = [];
 		}
-		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden, naam: item.naam, startDatum: item.startDatum, kanStudentExtraTijdVragen: item.kanStudentExtraTijdVragen, gestoptDoorHost: item.gestoptDoorHost });
+		dictionary[item.naam].push({ id: item._id, beschrijving: item.beschrijving, seconden: item.seconden, naam: item.naam, startDatum: item.startDatum, kanStudentExtraTijdVragen: item.kanStudentExtraTijdVragen });
 	});
 
 	return dictionary;
@@ -38,6 +39,8 @@ export const verwijderdOpdrachtFromDB = async (opdrachtId) => {
 	const opdrachten = database.collection('opdrachten');
 
 	const data = await opdrachten.deleteOne({ _id: ObjectId(opdrachtId) });
+
+	deleteRapportenByOpdrachtFromDB(opdrachtId);
 
 	return data;
 };
@@ -121,17 +124,6 @@ export const voegExtraTijdToeInDB = async (opdrachtId, gemiddeldeextraTijd) => {
 	const opdracht = await opdrachten.findOne({ _id: ObjectId(opdrachtId) });
 
 	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { seconden: gemiddeldeextraTijd * 60 + opdracht.seconden } });
-
-	return result;
-};
-
-export const stopOpdrachtInDB = async (opdrachtId) => {
-	const uri = process.env.MONGODB_URI;
-	const client = new MongoClient(uri);
-	const database = client.db('web3');
-	const opdrachten = database.collection('opdrachten');
-
-	const result = await opdrachten.updateOne({ _id: ObjectId(opdrachtId) }, { $set: { gestoptDoorHost: true } });
 
 	return result;
 };

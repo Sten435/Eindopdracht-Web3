@@ -50,6 +50,22 @@ export const deleteRapportFromDB = async (studentId, opdrachtId) => {
 	}
 };
 
+export const deleteRapportenByOpdrachtFromDB = async (opdrachtId) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+
+	try {
+		const database = client.db('web3');
+		const rapporten = database.collection('rapporten');
+
+		const result = await rapporten.deleteMany({ opdrachtId: ObjectId(opdrachtId) });
+
+		return result;
+	} finally {
+		await client.close();
+	}
+};
+
 export const getRapportenByOpdrachtIdFromDb = async (opdrachtId) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

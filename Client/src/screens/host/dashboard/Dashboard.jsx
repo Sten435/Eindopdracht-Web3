@@ -7,11 +7,13 @@ import { socket } from '../../../controller/socket';
 const Dashboard = () => {
 	const { response, updateScreen, loading, error, user } = LoadPage('/opdrachten', 'GET');
 
+	const removeOpdrachtEvent = (data) => {
+		alert('Er is een opdracht verwijderd door host');
+	};
+
 	useEffect(() => {
-		socket.on('refreshData', () => {
-			console.log('refreshing data');
-			updateScreen();
-		});
+		socket.on('removeOpdracht', removeOpdrachtEvent);
+		socket.on('refreshData', updateScreen);
 
 		return () => socket.off();
 	}, [response]);

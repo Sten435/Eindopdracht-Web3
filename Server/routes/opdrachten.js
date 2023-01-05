@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getOpdrachten, getOpdrachtById, startOpdracht, stopOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd, getOpdrachtByNaamEnBeschrijving, maakNieuweOpdracht, verwijderdOpdracht, updateBeschrijving, updateSeconden } from '../controllers/opdrachten_controller.js';
+import { getOpdrachten, getOpdrachtById, startOpdracht, wijzigExtraTijdVragen, voegExtraTijdToe, getGemiddeldeExtraTijd, getOpdrachtByNaamEnBeschrijving, maakNieuweOpdracht, verwijderdOpdracht, updateBeschrijving, updateSeconden } from '../controllers/opdrachten_controller.js';
 
 const router = Router();
 
@@ -130,24 +130,6 @@ router.post('/start', async (req, res) => {
 		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
 
 		await startOpdracht(opdrachtId);
-
-		return res.json({ message: 'success', error: false, loggedIn: true });
-	} catch (error) {
-		console.log(error);
-		return res.json({ message: error.message, error: true, loggedIn: true });
-	}
-});
-
-router.post('/stop', async (req, res) => {
-	try {
-		const { opdrachtId } = req.body;
-		if (!opdrachtId) return res.json({ message: 'opdrachtId is niet geldig', error: true, loggedIn: true });
-
-		const bestaatOpdrachtId = await getOpdrachtById(opdrachtId);
-		if (!bestaatOpdrachtId.found) return res.json({ message: 'opdracht bestaat niet', error: true, loggedIn: true });
-		if (bestaatOpdrachtId.opdracht.gestoptDoorHost) return res.json({ message: 'opdracht is al gestopt', error: true, loggedIn: true });
-
-		await stopOpdracht(opdrachtId);
 
 		return res.json({ message: 'success', error: false, loggedIn: true });
 	} catch (error) {

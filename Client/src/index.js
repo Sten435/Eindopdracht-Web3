@@ -39,6 +39,8 @@ window.alert.error = (
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+localStorage.setItem('alertId', null);
+
 root.render(
 	// <StrictMode>
 	<BrowserRouter>

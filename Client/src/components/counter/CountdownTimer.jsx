@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const CountdownTimer = ({ seconden, onEnd = null }) => {
+const CountdownTimer = ({ seconden, inSeconds, start = true, onEnd = null }) => {
 	const [countdown, setCountdown] = useState();
 
 	useEffect(() => {
@@ -8,8 +8,9 @@ const CountdownTimer = ({ seconden, onEnd = null }) => {
 	}, [seconden]);
 
 	useEffect(() => {
+		if (!start) return;
 		const interval = setInterval(() => {
-			setCountdown(countdown - 1);
+			setCountdown((prev) => prev - 1);
 		}, 1000);
 
 		if (countdown <= 0 && onEnd) onEnd();
@@ -29,6 +30,7 @@ const CountdownTimer = ({ seconden, onEnd = null }) => {
 	const secondsString = (seconds < 10 ? '0' : '') + seconds;
 	const formattedCountdown = (hoursString === '00' ? '' : hoursString + ':') + minutesString + ':' + secondsString;
 
+	if (inSeconds) return countdown;
 	return formattedCountdown;
 };
 
