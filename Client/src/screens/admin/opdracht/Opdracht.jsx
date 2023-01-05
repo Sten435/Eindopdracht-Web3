@@ -31,7 +31,7 @@ const Student = () => {
 		const result = await Fetch('opdrachten/maak', 'POST', { naam, beschrijving, seconden: minuten * 60 });
 
 		updateScreen();
-		opdrachtenGewijzigd();
+		refreshDataOnClients();
 
 		return { error: result.error, message: result.message };
 	};
@@ -45,7 +45,7 @@ const Student = () => {
 
 		setGeselecteerdeOpdrachtNaam(response.opdrachten[Object.keys(response.opdrachten)[0]].naam);
 		updateScreen();
-		opdrachtenGewijzigd();
+		refreshDataOnClients();
 	};
 
 	const wijzigExtraTijdVragen = async (id) => {
@@ -54,7 +54,7 @@ const Student = () => {
 		if (result.error) return alert(result.message);
 
 		updateScreen();
-		opdrachtenGewijzigd();
+		refreshDataOnClients();
 	};
 
 	const comboBoxSelectionChanged = (e) => {
@@ -62,27 +62,27 @@ const Student = () => {
 		setGeselecteerdeOpdrachtNaam(opdrachtNaam);
 	};
 
-	const updateOpdracht = (opdrachtId, beschrijving) => {
+	const updateOpdracht = async (opdrachtId, beschrijving) => {
 		if (!opdrachtId || !beschrijving) return;
 
-		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { beschrijving });
+		const result = await Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { beschrijving });
 		if (result.error) return alert(result.message);
 
 		updateScreen();
-		opdrachtenGewijzigd();
+		refreshDataOnClients();
 	};
 
-	const wijzigMinuten = (opdrachtId, minuten) => {
+	const wijzigMinuten = async (opdrachtId, minuten) => {
 		if (!opdrachtId || !minuten) return;
 
-		const result = Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { minuten: minuten / 60 });
+		const result = await Fetch(`opdrachten/update/${opdrachtId}`, 'POST', { minuten: minuten / 60 });
 		if (result.error) return alert.info(result.message);
 
 		updateScreen();
-		opdrachtenGewijzigd();
+		refreshDataOnClients();
 	};
 
-	const opdrachtenGewijzigd = () => {
+	const refreshDataOnClients = () => {
 		socket.emit('toClient', { action: 'refreshData' });
 	};
 
