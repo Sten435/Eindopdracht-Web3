@@ -25,8 +25,8 @@ const Card = (result) => {
 		);
 		boxColor = 'bg-green-500';
 	} else {
-		countDownTimer = 'Niet Gestart';
-		boxColor = 'bg-gray-500';
+		countDownTimer = 'Niet Begonnen';
+		boxColor = 'bg-gray-500 opacity-60';
 	}
 
 	return (
@@ -36,7 +36,7 @@ const Card = (result) => {
 			<div className={style.card}>
 				<div>
 					<h2>{naam}</h2>
-					<p style={{ marginBottom: '20px' }}>{beschrijving}</p>
+					<p className='mb-5'>{beschrijving}</p>
 					<span>
 						{!isLopend && startDatum && <p className='mr-2 inline'>Resterend:</p>}
 						<b className={`text-white p-1 px-2 ml-0 rounded ${boxColor}`}>{countDownTimer}</b>

@@ -49,6 +49,22 @@ export const voegStudentToeInDB = async (student) => {
 	}
 };
 
+export const updateStudentInDB = async (studentId, student) => {
+	const uri = process.env.MONGODB_URI;
+	const client = new MongoClient(uri);
+
+	try {
+		const database = client.db('web3');
+		const students = database.collection('studenten');
+
+		const result = await students.updateOne({ _id: ObjectId(studentId) }, { $set: student });
+
+		return result;
+	} finally {
+		await client.close();
+	}
+};
+
 export const getStudentByIdFromDB = async (studentId) => {
 	const uri = process.env.MONGODB_URI;
 	const client = new MongoClient(uri);

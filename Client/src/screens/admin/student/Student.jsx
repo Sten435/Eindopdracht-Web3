@@ -9,6 +9,7 @@ import Fetch from '../../../controller/fetch';
 import { useState } from 'react';
 import { useRef } from 'react';
 import { FaTrash } from 'react-icons/fa';
+import Loading from '../../loading/Loading';
 
 const Student = () => {
 	const [geselecteerdeGroep, setGeselecteerdeGroep] = useState('alle groepen');
@@ -19,6 +20,8 @@ const Student = () => {
 	const EmailRef = useRef();
 	const WachtwoordRef = useRef();
 	const GroepRef = useRef();
+
+	const tBody = useRef();
 
 	const { response, updateScreen, loading, error, user } = LoadPage('studenten', 'GET');
 
@@ -33,7 +36,7 @@ const Student = () => {
 		if (!voorNaam || !achternaam || !gebruikersnaam || !email || !wachtwoord) return 'Vul alle velden in';
 
 		const response = await Fetch('studenten/maak', 'POST', { voorNaam, achternaam, gebruikersnaam, email, wachtwoord, groep });
-		if (response.error) return alert(response.message);
+		if (response.error) return alert.error(response.message);
 
 		updateScreen();
 	};
@@ -58,19 +61,51 @@ const Student = () => {
 
 	const verwijderStudent = async (studentId) => {
 		const response = await Fetch(`studenten/verwijder/${studentId}`, 'POST');
-		if (response.error) return alert(response.message);
+		if (response.error) return alert.error(response.message);
 
 		updateScreen();
 	};
 
+	const updateStudent = async (studentId, student) => {
+		const response = await Fetch(`studenten/update/${studentId}`, 'POST', student);
+		if (response.error) return alert.error(response.message);
+
+		updateScreen();
+	};
+
+	const clickRow = (e) => {
+		e.target.contentEditable = true;
+		e.target.focus();
+	};
+
+	const exitRow = async (e, { cursusGroep }) => {
+		e.target.contentEditable = false;
+
+		const parent = e.target.parentElement;
+		const rowData = parent.getElementsByClassName('student-data');
+		const id = parent.id;
+
+		const student = {
+			voorNaam: rowData[0].innerText,
+			familieNaam: rowData[1].innerText,
+			sorteerNaam: rowData[2].innerText,
+			email: rowData[3].innerText,
+			gebruikersNaam: rowData[4].innerText,
+			cursusGroep: rowData[5].innerText ?? null,
+		};
+
+		if (!student.voorNaam || !student.familieNaam || !student.sorteerNaam || !student.email || !student.gebruikersNaam) return alert.error('Vul alle velden in');
+		if (!id) return alert.error('Geen id gevonden');
+
+		updateStudent(id, student);
+	};
+
 	if (error) return <p>Er is iets fout gegaan: {error}</p>;
-	if (loading) return <p>Loading... loading</p>;
-	if (!response) return <p>Loading... response</p>;
+	if (loading || !response) return <Loading />;
 
 	const { studenten, groepen } = response;
 
-	if (!studenten) return <p>Loading... studenten</p>;
-	if (!groepen) return <p>Loading... groepen</p>;
+	if (!studenten || !groepen) return <Loading />;
 
 	if (geselecteerdeGroep && ![...groepen, 'alle groepen'].includes(geselecteerdeGroep)) return setGeselecteerdeGroep('alle groepen');
 
@@ -86,7 +121,7 @@ const Student = () => {
 	return (
 		<>
 			<Header
-				title='Admin Opdracht'
+				title='ADMIN'
 				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
@@ -146,7 +181,7 @@ const Student = () => {
 						<>
 							<h2 className='mt-10 text-gray-700 font-bold text-2xl'>Kies een groep</h2>
 							<select
-								className='mb-4 mt-2 pr-2 pl-2 text-2xl w-fit rounded'
+								className='mb-4 mt-2 pr-2 pl-2 text-2xl w-fit max-w-full rounded'
 								defaultValue={geselecteerdeGroep}
 								onChange={comboBoxSelectionChanged}>
 								<option value='alle groepen'>Alle groepen ({studenten.length})</option>
@@ -170,14 +205,17 @@ const Student = () => {
 											<th className='px-4 py-2 text-left font-medium text-gray-900'>Sorteernaam</th>
 											<th className='px-4 py-2 text-left font-medium text-gray-900'>Email</th>
 											<th className='px-4 py-2 text-left font-medium text-gray-900'>Gebruikersnaam</th>
-											{geselecteerdeGroep === 'alle groepen' && <th className='px-4 py-2 text-left font-medium text-gray-900'>Cursus Groep</th>}
+											{geselecteerdeGroep === 'alle groepen' && <th className='px-4 py-2 text-left font-medium text-gray-900'>Groep</th>}
 										</tr>
 									</thead>
-									<tbody>
+									<tbody ref={tBody}>
 										{filteredData.map((student, index) => {
 											return (
 												<tr
+													id={student._id}
 													key={index}
+													onFocus={clickRow}
+													onBlur={(e) => exitRow(e, student)}
 													className='odd:bg-gray-100 even:bg-gray-200 relative select-none hover:text-white hover:bg-gray-700 transition-colors duration-100 cursor-text'
 													onMouseLeave={(e) => (e.target.contentEditable = false)}
 													onClick={(e) => (e.target.contentEditable = true)}>
@@ -189,12 +227,12 @@ const Student = () => {
 															size={14}
 														/>
 													</td>
-													<td className='px-4 py-2'>{student.voorNaam}</td>
-													<td className='px-4 py-2'>{student.familieNaam}</td>
-													<td className='px-4 py-2'>{student.sorteerNaam}</td>
-													<td className='px-4 py-2'>{student.email}</td>
-													<td className='px-4 py-2'>{student.gebruikersNaam}</td>
-													{geselecteerdeGroep === 'alle groepen' && <td className='px-4 py-2'>{student.cursusGroep ?? '-'}</td>}
+													<td className='px-4 py-2 student-data'>{student.voorNaam}</td>
+													<td className='px-4 py-2 student-data'>{student.familieNaam}</td>
+													<td className='px-4 py-2 student-data'>{student.sorteerNaam}</td>
+													<td className='px-4 py-2 student-data'>{student.email}</td>
+													<td className='px-4 py-2 student-data'>{student.gebruikersNaam}</td>
+													{geselecteerdeGroep === 'alle groepen' && <td className='px-4 py-2 student-data'>{student.cursusGroep ?? null}</td>}
 												</tr>
 											);
 										})}

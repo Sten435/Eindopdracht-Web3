@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getStudentById, getStudentByEmail, voegStudentToe, getStudenten, getGroepen, verwijderStudent } from '../controllers/studenten_controller.js';
+import { getStudentById, getStudentByEmail, voegStudentToe, getStudenten, getGroepen, verwijderStudent, updateStudent } from '../controllers/studenten_controller.js';
 
 const router = Router();
 
@@ -40,6 +40,32 @@ router.post('/maak', async (req, res) => {
 		if (bestaatStudentId.found) return res.json({ message: 'email bestaat al', error: true, loggedIn: true });
 
 		await voegStudentToe({ voorNaam, achternaam, gebruikersnaam, email, wachtwoord, groep });
+
+		return res.json({ message: 'success', error: false, loggedIn: true });
+	} catch (error) {
+		console.log(error);
+		return res.json({ message: error.message, error: true, loggedIn: true });
+	}
+});
+
+router.post('/update/:studentId', async (req, res) => {
+	try {
+		const { voorNaam, familieNaam, sorteerNaam, email, gebruikersNaam } = req.body;
+		let { cursusGroep } = req.body;
+		cursusGroep === '' ? (cursusGroep = 'Geen') : (cursusGroep = cursusGroep);
+
+		if (!voorNaam || !familieNaam || !sorteerNaam || !gebruikersNaam || !email) return res.json({ message: 'alle velden moeten ingevult zijn, buiten cursusgroep', error: true, loggedIn: true });
+
+		const { studentId } = req.params;
+		if (!studentId) return res.json({ message: 'studentId is niet geldig', error: true, loggedIn: true });
+
+		const bestaatStudentId = await getStudentById(studentId);
+		if (!bestaatStudentId.found) return res.json({ message: 'studentId bestaat niet', error: true, loggedIn: true });
+
+		const bestaatStudentEmail = await getStudentByEmail(email);
+		if (bestaatStudentEmail.found && bestaatStudentEmail.user._id === studentId) return res.json({ message: 'email bestaat al', error: true, loggedIn: true });
+
+		await updateStudent(studentId, { voorNaam, familieNaam, sorteerNaam, email, gebruikersNaam, cursusGroep });
 
 		return res.json({ message: 'success', error: false, loggedIn: true });
 	} catch (error) {

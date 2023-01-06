@@ -10,6 +10,7 @@ import Section from '../../../components/section/Section.jsx';
 import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
+import Loading from '../../loading/Loading.jsx';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
@@ -178,9 +179,9 @@ const OpdrachtElement = () => {
 		navigate('/host/dashboard');
 	}
 
-	if (loading) return <h1>Loading...</h1>;
+	if (loading) return <Loading />;
 
-	if (response.error) return alert(response.message);
+	if (response.error) return alert.error(response.message);
 	const { rapporten, opdracht } = response;
 
 	const titel = opdracht.beschrijving;

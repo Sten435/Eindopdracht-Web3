@@ -1,4 +1,4 @@
-import { getEncryptedPasswordFromEmailFromDB, getGroepenFromDB, getStudentByEmailFromDB, getStudentByIdFromDB, getStudentenFromDB, verwijderStudentFromDB, voegStudentToeInDB } from '../database/repositorys/student_repo.js';
+import { getEncryptedPasswordFromEmailFromDB, getGroepenFromDB, getStudentByEmailFromDB, getStudentByIdFromDB, getStudentenFromDB, updateStudentInDB, verwijderStudentFromDB, voegStudentToeInDB } from '../database/repositorys/student_repo.js';
 import bcrypt from 'bcrypt';
 
 export const getStudenten = async () => {
@@ -15,6 +15,10 @@ export const verwijderStudent = async (studentId) => {
 
 export const validateCode = async (code, hash) => {
 	return await bcrypt.compare(code, hash);
+};
+
+export const updateStudent = async (studentId, student) => {
+	return await updateStudentInDB(studentId, student);
 };
 
 export const encryptCode = (code) => {

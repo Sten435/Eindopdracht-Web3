@@ -7,7 +7,7 @@ import Papa from 'papaparse';
 import { socket } from '../../controller/socket';
 
 const LoadCSV = ({ type }) => {
-	const { loading, error } = LoadPage();
+	const { loading, error } = LoadPage('', '', false);
 
 	if (loading) return <Loading />;
 	if (error) return <p>error check console...</p>;

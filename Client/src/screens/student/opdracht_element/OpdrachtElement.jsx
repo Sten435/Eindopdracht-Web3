@@ -10,6 +10,7 @@ import Section from '../../../components/section/Section.jsx';
 import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
+import Loading from '../../loading/Loading.jsx';
 import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
@@ -189,7 +190,7 @@ const OpdrachtElement = () => {
 		navigate('/student/dashboard');
 	}
 
-	if (loading || selectedRadioButton === undefined) return <p>Loading...</p>;
+	if (loading || selectedRadioButton === undefined) return <Loading />;
 
 	const { naam, beschrijving } = response.opdracht;
 

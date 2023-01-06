@@ -1,4 +1,5 @@
 import { insertOpdrachtInDb, insertStudentenInDb } from '../database/repositorys/csv_repo.js';
+import { getOpdrachtByNaamEnBeschrijving } from '../controllers/opdrachten_controller.js';
 import { encryptCode } from './studenten_controller.js';
 
 export const insertOpdracht = async (opdrachten) => {
@@ -16,6 +17,16 @@ export const insertOpdracht = async (opdrachten) => {
 		})
 		.filter((o) => o !== undefined) // verwijder header van csv
 		.filter((o) => o.naam && o.beschrijving && o.seconden); // verwijder opdrachten die lege rijen bevatten
+
+	opdrachten.filter(async (opdracht) => {
+		if (!opdracht.naam || !opdracht.beschrijving || !opdracht.seconden) return false;
+		if (opdracht.seconden < 0) return false;
+
+		const bestaatOpdracht = await getOpdrachtByNaamEnBeschrijving(opdracht.naam, opdracht.beschrijving);
+		if (bestaatOpdracht.found) return false;
+
+		return true;
+	});
 
 	await insertOpdrachtInDb(opdrachten);
 };

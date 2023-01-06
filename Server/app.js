@@ -22,21 +22,21 @@ import authRoute from './routes/auth.js';
 const app = express();
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
-const io = new Server(server, {
+
+const corsInfo = {
 	cors: {
-		origin: ['http://localhost:3000', 'http://localhost:5000'],
+		origin: ['http://localhost:3000', 'http://localhost:5000', 'https://dd7f-2a02-1811-e588-d700-5089-a2e0-9c5f-eb42.eu.ngrok.io'],
 		credentials: true,
 	},
-});
+};
 
-app.use(helmet()); // secure apps by setting various HTTP headers
-app.use(
-	cors({
-		credentials: true,
-		origin: ['http://localhost:3000', 'http://localhost:5000'],
-	}),
-);
-app.use(cookieParser()); // json limit
+const io = new Server(server, corsInfo);
+
+app.use(helmet());
+
+app.use(cors(corsInfo.cors));
+app.use(cookieParser());
+
 app.use(bodyParser.urlencoded({ extended: false, limit: '2MB' }));
 app.use(bodyParser.json({ limit: '2MB' }));
 
@@ -60,4 +60,4 @@ io.on('connection', (socket) => {
 });
 
 console.clear();
-server.listen(port, () => console.log(`http://localhost:${port}`));
+server.listen(port, () => console.log(`http://localhost:${port}/`));

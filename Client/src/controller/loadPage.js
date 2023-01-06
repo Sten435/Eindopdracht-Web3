@@ -23,6 +23,7 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		if (data.error) return alert(data.message);
 
 		setResponse(data);
+		return data;
 	};
 
 	useEffect(() => {
@@ -43,14 +44,16 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 					const data = await Fetch('/auth', 'GET', { signal: controller.signal });
 					if (!data.loggedIn) {
 						if (location.pathname === '/') return;
-						return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
+						alert('U bent niet ingelogd. Log in om verder te gaan.');
+						return navigate('/logout');
 					} else {
-						if (location.pathname === '/') return navigate('/student/dashboard');
-						else if (!user) setUser({ ...data.user });
+						if (location.pathname === '/') {
+							return navigate('/student/dashboard');
+						} else if (!user) setUser({ ...data.user });
 					}
 				} catch (error) {
 					console.log(`authenticate: ${error}`);
-					return navigate('/logout', { replace: true, reden: 'Uitgelogd' });
+					return navigate('/logout');
 				}
 			}
 

@@ -8,6 +8,7 @@ import Section from '../../../components/section/Section';
 import Fetch from '../../../controller/fetch';
 import LoadPage from '../../../controller/loadPage';
 import { socket } from '../../../controller/socket';
+import Loading from '../../loading/Loading';
 
 const Student = () => {
 	const [geselecteerdeOpdrachtNaam, setGeselecteerdeOpdrachtNaam] = useState();
@@ -100,8 +101,7 @@ const Student = () => {
 	}, [response]);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
-	if (loading) return <p>Loading... loading</p>;
-	if (!response) return <p>Loading... response</p>;
+	if (loading || !response) return <Loading />;
 
 	const { opdrachten } = response;
 
@@ -110,7 +110,7 @@ const Student = () => {
 	return (
 		<>
 			<Header
-				title='Admin Opdracht'
+				title='ADMIN'
 				metTerugButton
 				name={user.voorNaam + ' ' + user.familieNaam}
 			/>
@@ -156,7 +156,7 @@ const Student = () => {
 						<>
 							<h2 className='mt-10 text-gray-700 font-bold text-2xl'>Kies een opdracht</h2>
 							<select
-								className='mb-4 mt-2 p-2 text-2xl w-fit rounded focus:outline-none'
+								className='mb-4 mt-2 p-2 text-2xl w-fit max-w-full rounded focus:outline-none'
 								onChange={comboBoxSelectionChanged}
 								value={geselecteerdeOpdrachtNaam}>
 								{Object.keys(opdrachten)?.map((key, index) => (

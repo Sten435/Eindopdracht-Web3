@@ -5,6 +5,7 @@ import OpdrachtenLijst from '../../../components/opdrachtenLijst/OpdrachtenLijst
 import LoadPage from '../../../controller/loadPage';
 
 import { socket } from '../../../controller/socket.js';
+import Loading from '../../loading/Loading';
 
 const Dashboard = () => {
 	const { response, updateScreen, loading, error, user } = LoadPage('/opdrachten', 'GET');
@@ -21,7 +22,7 @@ const Dashboard = () => {
 	}, []);
 
 	if (error) return <p>Er is iets fout gegaan</p>;
-	if (loading) return <p>Loading...</p>;
+	if (loading) return <Loading />;
 	if (response.error) return alert(response.error.message);
 
 	const { opdrachten } = response;
