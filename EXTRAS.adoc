@@ -2,6 +2,7 @@
 
 * *Authenticatie*
 * *Websockets*
+* *Json Web Tokens (cookie)*
 * *CSV-upload*
 * *Beheer via UI van studenten*
 * *Chart in host*

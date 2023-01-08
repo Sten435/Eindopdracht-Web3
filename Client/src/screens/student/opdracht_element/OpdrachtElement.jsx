@@ -11,7 +11,6 @@ import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
 import Loading from '../../loading/Loading.jsx';
-import style from './opdrachtElement.module.css';
 
 const OpdrachtElement = () => {
 	const [vragen, setVraag] = useState([]);
@@ -195,7 +194,7 @@ const OpdrachtElement = () => {
 	const { naam, beschrijving } = response.opdracht;
 
 	return (
-		<main className={style.main}>
+		<main className='block'>
 			<Header
 				title='Student'
 				metTerugButton
@@ -254,9 +253,8 @@ const OpdrachtElement = () => {
 									<b>Bezig</b>
 								</label>
 							</div>
-							<div className={style.flexContainer}>
+							<div className='flex items-center'>
 								<input
-									className={style.radio}
 									name='status'
 									type='radio'
 									value='ik doe niet mee'
@@ -267,9 +265,8 @@ const OpdrachtElement = () => {
 									<b>Ik doe niet mee</b>
 								</label>
 							</div>
-							<div className={style.flexContainer}>
+							<div className='flex items-center'>
 								<input
-									className={style.radio}
 									name='status'
 									type='radio'
 									value='ik geef op'
@@ -280,9 +277,8 @@ const OpdrachtElement = () => {
 									<b>Ik geef op</b>
 								</label>
 							</div>
-							<div className={style.flexContainer}>
+							<div className='flex items-center'>
 								<input
-									className={style.radio}
 									name='status'
 									type='radio'
 									value='ik ben klaar'
@@ -299,7 +295,7 @@ const OpdrachtElement = () => {
 					{kanStudentExtraTijdVragen && (
 						<Section title='Extra tijd'>
 							<div
-								className={style.flexContainer}
+								className='flex items-center'
 								style={{ marginBottom: '2rem' }}>
 								<Button
 									text='+ 1 min'

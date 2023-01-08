@@ -32,17 +32,17 @@ const Card = (result) => {
 	return (
 		<Link
 			to={to}
-			style={{ textDecoration: 'none', width: '100%' }}>
+			className='decoration-transparent w-full'>
 			<div className={style.card}>
 				<div>
-					<h2>{naam}</h2>
+					<h2 className='m-0'>{naam}</h2>
 					<p className='mb-5'>{beschrijving}</p>
 					<span>
 						{!isLopend && startDatum && <p className='mr-2 inline'>Resterend:</p>}
 						<b className={`text-white p-1 px-2 ml-0 rounded ${boxColor}`}>{countDownTimer}</b>
 					</span>
 				</div>
-				{status && <span className={style.statusContainer + ' ' + style[status]}>{status}</span>}
+				{status && <span className={'p-[5px] text-center text-white font-bold rounded ' + style[status]}>{status}</span>}
 			</div>
 		</Link>
 	);

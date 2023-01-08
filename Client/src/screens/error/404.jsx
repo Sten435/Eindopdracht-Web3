@@ -1,10 +1,8 @@
-import style from './404.module.css';
-
 const Error = () => {
 	return (
-		<main style={{ justifyContent: 'center' }}>
-			<div className={style.titleContainer}>
-				<h1 className={style.title}>Pagina niet gevonden</h1>
+		<main className='justify-center'>
+			<div className='p-4 bg-red-500 rounded'>
+				<h1 className='text-2xl sm:text-5xl md:text-6xl text-white'>Pagina niet gevonden</h1>
 			</div>
 		</main>
 	);

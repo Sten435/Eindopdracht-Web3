@@ -23,7 +23,11 @@ const Header = ({ title, name, metTerugButton = false, metLogoutButton = false }
 							}}>
 							{title && title.toUpperCase()}
 						</span>
-						{name && <span className='hidden sm:inline-block'> - {name.toUpperCase()}</span>}
+						{name && (
+							<span className='hidden sm:inline-block'>
+								<span className='ml-1'>-</span> {name.toUpperCase()}
+							</span>
+						)}
 					</h1>
 				</div>
 				<div className='w-fit navbar-menu lg:order-1 lg:block lg:w-2/5'>

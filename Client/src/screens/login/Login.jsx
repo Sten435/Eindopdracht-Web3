@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import style from './login.module.css';
 import LoadPage from '../../controller/loadPage';
 import Button from '../../components/button/Button';
 import InputText from '../../components/inputText/InputText';
@@ -28,11 +27,11 @@ const Login = () => {
 	};
 
 	return (
-		<main className={style.main}>
-			<div className={style.formContainer}>
-				<div className={style.emailContainer}>
+		<main className='flex justify-center items-center'>
+			<div className='w-[80%] max-w-[750px]'>
+				<div className='flex flex-col justify-center items-start'>
 					<label
-						className={style.label}
+						className='mb-2 pl-1 text-2xl font-bold'
 						htmlFor='email'>
 						Email:
 					</label>
@@ -42,9 +41,9 @@ const Login = () => {
 						placeholder='Enter your email'
 					/>
 				</div>
-				<div className={style.pincodeContainer}>
+				<div className='flex flex-col justify-center items-start mt-5'>
 					<label
-						className={style.label}
+						className='mb-2 pl-1 text-2xl font-bold'
 						htmlFor='pincode'>
 						Pincode:
 					</label>
@@ -54,9 +53,9 @@ const Login = () => {
 						placeholder='Enter your pincode'
 					/>
 				</div>
-				<div className={style.loginContainer}>
+				<div className='flex justify-center items-center flex-col'>
 					<Button
-						text='Maak'
+						text='Login'
 						click={loginRequest}
 						className='text-xl mt-10 mb-5 text-slate-200 bg-gray-800 w-full'
 					/>
