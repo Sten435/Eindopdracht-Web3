@@ -37,12 +37,14 @@ const Student = () => {
 		return { error: result.error, message: result.message };
 	};
 
-	const removeOpdracht = async (id) => {
+	const removeOpdracht = async (opdracht) => {
+		const id = opdracht?.id;
 		if (!id) return;
-		const result = await Fetch(`opdrachten/${id}`, 'DELETE', { opdrachtId: id });
-		if (result.error) return alert(result.message);
 
-		socket.emit('toClient', { opdrachtId: id, action: 'removeOpdracht' });
+		const result = await Fetch(`opdrachten/${id}`, 'DELETE', { opdrachtId: id });
+		if (result.error) return alert.error(result.message);
+
+		socket.emit('toClient', { adminOnly: opdracht.status !== 'Lopend', opdrachtId: id, action: 'removeOpdracht' });
 
 		setGeselecteerdeOpdrachtNaam(response.opdrachten[Object.keys(response.opdrachten)[0]].naam);
 		updateScreen();
@@ -273,7 +275,7 @@ const Student = () => {
 															<FaTrash
 																className='inline bg-red-500 rounded text-white p-[.4rem] hover:scale-110 hover:bg-white transition-transform duration-100 hover:text-red-500'
 																size={30}
-																onClick={() => removeOpdracht(opdracht.id)}
+																onClick={() => removeOpdracht(opdracht)}
 															/>
 														</td>
 													</tr>

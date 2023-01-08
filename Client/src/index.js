@@ -9,7 +9,7 @@ window.alert = (
 	str,
 	options = {
 		position: 'bottom-right',
-		autoClose: false,
+		autoClose: 10000,
 		hideProgressBar: false,
 		closeOnClick: true,
 		pauseOnHover: true,
@@ -23,7 +23,7 @@ window.alert.error = (
 	str,
 	options = {
 		position: 'top-center',
-		autoClose: false,
+		autoClose: 10000,
 		hideProgressBar: false,
 		closeOnClick: true,
 		pauseOnHover: true,

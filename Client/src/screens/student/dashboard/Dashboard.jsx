@@ -10,8 +10,8 @@ import Loading from '../../loading/Loading';
 const Dashboard = () => {
 	const { response, updateScreen, loading, error, user } = LoadPage('/opdrachten', 'GET');
 
-	const removeOpdrachtEvent = (data) => {
-		alert('Er is een opdracht verwijderd door host');
+	const removeOpdrachtEvent = ({ adminOnly }) => {
+		if (adminOnly === false) alert('Er is een opdracht verwijderd door host');
 	};
 
 	useEffect(() => {
