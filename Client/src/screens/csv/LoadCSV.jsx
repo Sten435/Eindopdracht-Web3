@@ -31,20 +31,21 @@ const LoadCSV = ({ type }) => {
 
 	return (
 		<>
-			<main>
+			<main className='flex h-screen'>
 				<Header
 					title='Import csv'
 					metTerugButton
-					name={'type: ' + type}
+					name={type}
 				/>
-				<div className='flex items-center justify-center w-full'>
+				<h1 className='text-4xl font-bold text-gray-700 mt-20'>Voeg {type}en toe</h1>
+				<div>
 					<label
 						htmlFor='dropzone-file'
-						className='flex flex-col items-center justify-center w-full p-5 border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 relative'>
-						<div className='flex flex-col items-center justify-center'>
+						className='flex flex-col items-center justify-center mt-10 w-full p-5 border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 relative'>
+						<div className='flex flex-col items-center justify p-10'>
 							<svg
 								aria-hidden='true'
-								className='w-10 h-10 mb-3 text-gray-400'
+								className='w-10 h-10 mb-5 scale-150 text-gray-200'
 								fill='none'
 								stroke='currentColor'
 								viewBox='0 0 24 24'
@@ -55,10 +56,9 @@ const LoadCSV = ({ type }) => {
 									strokeWidth='2'
 									d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'></path>
 							</svg>
-							<p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
-								<span className='font-semibold'>Click to upload</span>
+							<p className='mb-2 text-sm text-gray-500 text-gray-200'>
+								<span className='font-semibold text-4xl'>Click to upload</span>
 							</p>
-							<p className='text-xs text-gray-500 dark:text-gray-400'>*.CSV</p>
 						</div>
 						<input
 							id='dropzone-file'
