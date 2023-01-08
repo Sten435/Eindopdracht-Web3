@@ -186,8 +186,8 @@ const OpdrachtElement = () => {
 	}, [response]);
 
 	if (error) {
-		alert(error.message);
-		navigate('/student/dashboard');
+		alert.error(error.message);
+		return navigate('/student/dashboard');
 	}
 
 	if (loading || selectedRadioButton === undefined) return <Loading />;

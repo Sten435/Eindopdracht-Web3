@@ -176,7 +176,7 @@ const OpdrachtElement = () => {
 
 	if (error) {
 		alert(error.message);
-		navigate('/host/dashboard');
+		return navigate('/host/dashboard');
 	}
 
 	if (loading) return <Loading />;
@@ -282,6 +282,13 @@ const OpdrachtElement = () => {
 				<div style={{ textAlign: 'center', marginBottom: '1.2rem', marginTop: '.8rem' }}>
 					<h1 className='text-2xl mb-4'>{titel}</h1>
 				</div>
+				{rapporten?.length > 0 && (
+					<div className='flex justify-center'>
+						<div className='text-xl p-2 bg-cyan-500 text-white rounded inline'>
+							Aantal Rapporten: <b>{rapporten.length}</b>
+						</div>
+					</div>
+				)}
 				{rapporten?.length > 0 ? (
 					rapporten.map((rapport, index) => {
 						return (

@@ -25,7 +25,7 @@ const server = http.createServer(app);
 
 const corsInfo = {
 	cors: {
-		origin: ['http://localhost:3000', 'http://localhost:5000', 'https://dd7f-2a02-1811-e588-d700-5089-a2e0-9c5f-eb42.eu.ngrok.io'],
+		origin: ['http://localhost:3000', 'http://localhost:5000'],
 		credentials: true,
 	},
 };
@@ -37,8 +37,8 @@ app.use(helmet());
 app.use(cors(corsInfo.cors));
 app.use(cookieParser());
 
-app.use(bodyParser.urlencoded({ extended: false, limit: '2MB' }));
-app.use(bodyParser.json({ limit: '2MB' }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '10MB' }));
+app.use(bodyParser.json({ limit: '10MB' }));
 
 app.use(auth);
 

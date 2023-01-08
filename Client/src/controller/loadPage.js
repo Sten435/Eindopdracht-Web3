@@ -20,28 +20,33 @@ const LoadPage = (url = '', method = '', withAuth = true) => {
 		axios.defaults.withCredentials = true;
 
 		const data = await Fetch(url, method);
-		if (data.error) return alert(data.message);
+
+		if (!data.loggedIn) {
+			if (location.pathname === '/') return;
+			alert('U bent niet ingelogd. Log in om verder te gaan.');
+			return navigate('/logout');
+		}
+
+		if (data.error) {
+			setError(data.message);
+			return alert(data.message);
+		}
 
 		setResponse(data);
 		return data;
 	};
 
 	useEffect(() => {
-		const controller = new AbortController();
-		fetchData(controller);
-
-		return () => {
-			controller.abort();
-		};
+		fetchData();
 	}, [url, navigate, withAuth, method, location.pathname, user]);
 
-	const fetchData = async (controller) => {
+	const fetchData = async () => {
 		try {
 			setLoading(true);
 			if (withAuth) {
 				try {
 					axios.defaults.withCredentials = true;
-					const data = await Fetch('/auth', 'GET', { signal: controller.signal });
+					const data = await Fetch('/auth', 'GET');
 					if (!data.loggedIn) {
 						if (location.pathname === '/') return;
 						alert('U bent niet ingelogd. Log in om verder te gaan.');

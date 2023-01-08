@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { getStudentByEmail } from './studenten_controller.js';
 
 export const createToken = (object) => {
 	const token = jwt.sign(
@@ -12,12 +13,15 @@ export const createToken = (object) => {
 	return token;
 };
 
-export const verifyToken = (token) => {
+export const verifyToken = async (token) => {
 	try {
 		const decodedObject = jwt.verify(token, process.env.JWT);
-		if (decodedObject.exp < Date.now() / 1000) return res.json({ error: true, message: 'token is expired', loggedIn: false });
+		if (decodedObject.exp < Date.now() / 1000) throw new Error('token is expired');
+		const bestaatStudent = await getStudentByEmail(decodedObject.email);
+		if (!bestaatStudent.found) return new Error('gebruiker is verwijderd');
+
 		return { valid: true, user: decodedObject };
 	} catch (error) {
-		return res.json({ error: true, message: 'token is expired', loggedIn: false });
+		return { valid: false, error, message: error.message };
 	}
 };
