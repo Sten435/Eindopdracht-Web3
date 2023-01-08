@@ -41,15 +41,15 @@ const Rapport = (rapport) => {
 				<div>
 					<div className='mb-4'>
 						<span className='mr-1'>Status:</span>
-						<span className={'pb-1 pl-2 pr-2 pt-1 text-gray-50 font-bold rounded ' + statusColor}>{status}</span>
+						<span className={'pb-1 pl-2 pr-2 pt-1 text-white bg-gray-700 font-bold rounded'}>{status}</span>
 					</div>
 					<div className='mb-4'>
 						<span className='mr-1'>Extra tijd:</span>
-						<span className='pb-1 pl-2 pr-2 pt-1 text-gray-50 font-bold rounded bg-gray-500'>{extraTijd ? extraTijd + ' min' : '/'}</span>
+						<span className='pb-1 pl-2 pr-2 pt-1 text-white bg-gray-700 font-bold rounded'>{extraTijd ? extraTijd + ' min' : '/'}</span>
 					</div>
 
 					<span className='mt-4'>Vragen:</span>
-					{vragen?.length === 0 ? <span className={'pb-1 pl-2 pr-2 pt-1 ml-2 text-white bg-gray-500 font-bold rounded ' + statusColor}>/</span> : ''}
+					{vragen?.length === 0 ? <span className={'pb-1 pl-2 pr-2 pt-1 ml-2 text-white bg-gray-700 font-bold rounded'}>/</span> : ''}
 					{vragen?.length > 0 && (
 						<>
 							<ul className='mt-2'>

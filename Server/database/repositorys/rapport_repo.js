@@ -57,8 +57,18 @@ export const deleteRapportenByOpdrachtFromDB = async (opdrachtId) => {
 	try {
 		const database = client.db('web3');
 		const rapporten = database.collection('rapporten');
+		const vragen = database.collection('vragen');
+
+		const opdrachtRapporten = await getRapportenByOpdrachtIdFromDb(opdrachtId);
+
+		const vragenId = [...opdrachtRapporten]
+			.map((rapport) => rapport.vragen)
+			.flat(1)
+			.map((vraag) => vraag._id);
 
 		const result = await rapporten.deleteMany({ opdrachtId: ObjectId(opdrachtId) });
+
+		await vragen.deleteMany({ _id: { $in: vragenId } });
 
 		return result;
 	} finally {

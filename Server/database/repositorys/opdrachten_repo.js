@@ -40,7 +40,7 @@ export const verwijderdOpdrachtFromDB = async (opdrachtId) => {
 
 	const data = await opdrachten.deleteOne({ _id: ObjectId(opdrachtId) });
 
-	deleteRapportenByOpdrachtFromDB(opdrachtId);
+	await deleteRapportenByOpdrachtFromDB(opdrachtId);
 
 	return data;
 };

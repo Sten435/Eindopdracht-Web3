@@ -11,6 +11,7 @@ import Fetch from '../../../controller/fetch.js';
 import LoadPage from '../../../controller/loadPage.js';
 import { socket } from '../../../controller/socket.js';
 import Loading from '../../loading/Loading.jsx';
+import { Chart } from 'react-google-charts';
 
 const OpdrachtElement = () => {
 	const { id: opdrachtId } = useParams();
@@ -242,6 +243,29 @@ const OpdrachtElement = () => {
 		extraTijdButton = <FaLock />;
 	}
 
+	const statusData = rapporten.map((rapport) => {
+		return [rapport.status];
+	});
+
+	const statusDataDict = [];
+	for (const element of statusData) {
+		if (element in statusDataDict) {
+			statusDataDict[element] += 1;
+		} else {
+			statusDataDict[element] = 1;
+		}
+	}
+
+	const options = {
+		backgroundColor: 'transparent',
+		legend: { position: 'bottom', alignment: 'center', textStyle: { color: 'text-gray-700', fontSize: '15' } },
+		chartArea: { left: 0, bottom: 20, width: '100%', height: '100%' },
+
+		is3D: true,
+	};
+
+	const chartData = [['Status', 'Aantal Studenten'], ...Object.entries(statusDataDict)];
+
 	return (
 		<>
 			<Header
@@ -278,7 +302,7 @@ const OpdrachtElement = () => {
 			</div>
 			<Section
 				noLine
-				className='pt-5'>
+				className='pt-5 pb-5'>
 				<div style={{ textAlign: 'center', marginBottom: '1.2rem', marginTop: '.8rem' }}>
 					<h1 className='text-2xl mb-4'>{titel}</h1>
 				</div>
@@ -288,6 +312,15 @@ const OpdrachtElement = () => {
 							Aantal Rapporten: <b>{rapporten.length}</b>
 						</div>
 					</div>
+				)}
+				{chartData.length > 1 && (
+					<Chart
+						chartType='PieChart'
+						className='my-8 flex justify-center'
+						data={chartData}
+						options={options}
+						width='100%'
+					/>
 				)}
 				{rapporten?.length > 0 ? (
 					rapporten.map((rapport, index) => {
